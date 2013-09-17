@@ -18,6 +18,8 @@ namespace NamedPipeTest
 
         private readonly List<UpdateServerClient> _clients = new List<UpdateServerClient>();
 
+        private int _nextPipeId = 0;
+
         public UpdateServer()
         {
             ThreadPool.QueueUserWorkItem(ListenAsync);
@@ -40,14 +42,25 @@ namespace NamedPipeTest
         private void WaitForConnection(string pipeName)
         {
             NamedPipeServerStream server = null;
+            NamedPipeServerStream instance = null;
             UpdateServerClient updateServerClient = null;
 
             try
             {
-                server = new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough);
+                server = CreateServer(pipeName);
                 server.WaitForConnection();
 
-                updateServerClient = UpdateServerClient.CreateClient(server);
+                var instancePipeName = string.Format("{0}_{1}", pipeName, ++_nextPipeId);
+
+                var serverWrapper = new PipeStreamWrapper<string>(server);
+                serverWrapper.WriteObject(instancePipeName);
+                serverWrapper.WaitForPipeDrain();
+                serverWrapper.Close();
+
+                instance = CreateServer(instancePipeName);
+                instance.WaitForConnection();
+
+                updateServerClient = UpdateServerClient.CreateClient(instance);
                 updateServerClient.ReceiveMessage += ClientOnReceiveMessage;
                 updateServerClient.Disconnected += ClientOnDisconnected;
 
@@ -61,16 +74,30 @@ namespace NamedPipeTest
             {
                 Console.Error.WriteLine("Named pipe is broken or disconnected: {0}", e);
 
-                if (server == null) return;
-
-                using (var ps2 = server)
+                if (server != null)
                 {
-                    ps2.Close();
+                    using (var ps2 = server)
+                    {
+                        ps2.Close();
+                    }
+                }
+
+                if (instance != null)
+                {
+                    using (var ps2 = instance)
+                    {
+                        ps2.Close();
+                    }
                 }
 
                 if (ClientDisconnected != null)
                     ClientDisconnected(updateServerClient);
             }
+        }
+
+        private static NamedPipeServerStream CreateServer(string pipeName)
+        {
+            return new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough);
         }
 
         private void ClientOnReceiveMessage(UpdateServerClient updateServerClient, string message)

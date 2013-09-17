@@ -26,18 +26,26 @@ namespace NamedPipeTest
 
         private void Listen(string pipeName)
         {
-            NamedPipeClientStream pipeClient = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.WriteThrough);
+            NamedPipeClientStream @default = CreatePipe(pipeName);
 
             // Connect to the pipe or wait until the pipe is available.
-            Console.Write("Attempting to connect to pipe...");
-            pipeClient.Connect();
+            @default.Connect();
 
-            Console.WriteLine("Connected to pipe.");
-            Console.WriteLine("There are currently {0} pipe server instances open.", pipeClient.NumberOfServerInstances);
+            var defaultWrapper = new PipeStreamWrapper<string>(@default);
+            var instancePipeName = defaultWrapper.ReadObject();
+            defaultWrapper.Close();
 
-            var client = UpdateClientClient.CreateClient(pipeClient);
+            var instance = CreatePipe(instancePipeName);
+            instance.Connect();
+
+            var client = UpdateClientClient.CreateClient(instance);
             client.ReceiveMessage += ClientOnReceiveMessage;
             _clients.Add(client);
+        }
+
+        private static NamedPipeClientStream CreatePipe(string pipeName)
+        {
+            return new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.WriteThrough);
         }
 
         private void ClientOnReceiveMessage(UpdateClientClient updateServerClient, string message)

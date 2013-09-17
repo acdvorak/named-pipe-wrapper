@@ -82,7 +82,7 @@ namespace NamedPipeTest
 
         public void Close()
         {
-            _streamWrapper.BaseStream.Close();
+            _streamWrapper.Close();
             _writeSignal.Set();
         }
 
