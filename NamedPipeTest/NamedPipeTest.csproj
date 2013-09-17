@@ -47,6 +47,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PipeStreamReader.cs" />
+    <Compile Include="PipeStreamWrapper.cs" />
+    <Compile Include="PipeStreamWriter.cs" />
     <Compile Include="UpdateClientClient.cs" />
     <Compile Include="UpdateServerClient.cs" />
     <Compile Include="FormClient.cs">
