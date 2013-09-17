@@ -46,15 +46,15 @@ namespace NamedPipeTest
         {
             while (_streamWrapper.IsConnected && _streamWrapper.CanRead)
             {
-                var str = _streamWrapper.ReadObject();
-                if (str == null)
+                var obj = _streamWrapper.ReadObject();
+                if (obj == null)
                 {
                     Close();
                     OnDisconnected();
                     return;
                 }
                 if (ReceiveMessage != null)
-                    ReceiveMessage(this, str);
+                    ReceiveMessage(this, obj);
             }
         }
 
