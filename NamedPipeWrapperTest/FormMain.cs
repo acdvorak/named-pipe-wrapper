@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace NamedPipeTest
+namespace NamedPipeWrapperTest
 {
     public partial class FormMain : Form
     {

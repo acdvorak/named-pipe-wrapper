@@ -6,12 +6,13 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using NamedPipeWrapper;
 
-namespace NamedPipeTest
+namespace NamedPipeWrapperTest
 {
     public partial class FormClient : Form
     {
-        private readonly Client<string> _client = new Client<string>();
+        private readonly Client<string> _client = new Client<string>(Constants.PIPE_NAME);
 
         public FormClient()
         {

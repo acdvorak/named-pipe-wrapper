@@ -4,8 +4,9 @@ using System.IO.Pipes;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using NamedPipeWrapper.IO;
 
-namespace NamedPipeTest
+namespace NamedPipeWrapper
 {
     public class Connection<T> where T : class
     {

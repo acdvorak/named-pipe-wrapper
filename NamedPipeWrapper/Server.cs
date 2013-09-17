@@ -5,8 +5,9 @@ using System.IO.Pipes;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using NamedPipeWrapper.IO;
 
-namespace NamedPipeTest
+namespace NamedPipeWrapper
 {
     public class Server<T> where T : class
     {
@@ -18,9 +19,9 @@ namespace NamedPipeTest
 
         private int _nextPipeId;
 
-        public Server()
+        public Server(string pipeName)
         {
-            ThreadPool.QueueUserWorkItem(ListenAsync);
+            ThreadPool.QueueUserWorkItem(ListenAsync, pipeName);
         }
 
         public void PushMessage(T message)
@@ -33,9 +34,9 @@ namespace NamedPipeTest
 
         #region Private methods
 
-        private void ListenAsync(object state)
+        private void ListenAsync(object pipeName)
         {
-            ListenSync(Constants.PIPE_NAME);
+            ListenSync((string) pipeName);
         }
 
         private void ListenSync(string pipeName)

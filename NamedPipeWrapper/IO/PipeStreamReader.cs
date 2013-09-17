@@ -6,7 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
 
-namespace NamedPipeTest
+namespace NamedPipeWrapper.IO
 {
     public class PipeStreamReader<T>
     {

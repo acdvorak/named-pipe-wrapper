@@ -5,7 +5,7 @@ using System.IO.Pipes;
 using System.Linq;
 using System.Text;
 
-namespace NamedPipeTest
+namespace NamedPipeWrapper.IO
 {
     public class PipeStreamWrapper<T>
     {

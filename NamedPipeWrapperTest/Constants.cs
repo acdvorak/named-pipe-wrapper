@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace NamedPipeTest
+namespace NamedPipeWrapperTest
 {
     static class Constants
     {
