@@ -54,4 +54,6 @@ namespace NamedPipeTest
             }
         }
     }
+
+    public delegate void ClientConnectionEventHandler(UpdateClientClient updateClientClient);
 }

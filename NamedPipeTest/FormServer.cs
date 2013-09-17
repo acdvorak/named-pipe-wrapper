@@ -22,19 +22,19 @@ namespace NamedPipeTest
 
         private void OnLoad(object sender, EventArgs eventArgs)
         {
-            _server.Connection += ServerOnConnection;
-            _server.Disconnection += ServerOnDisconnection;
+            _server.ClientConnected += ServerOnClientConnected;
+            _server.ClientDisconnected += ServerOnClientDisconnected;
             _server.ClientMessage += (client, message) => AddLine("<b>" + client.Name + "</b>: " + message);
         }
 
-        private void ServerOnConnection(UpdateServerClient updateServerClient)
+        private void ServerOnClientConnected(UpdateServerClient updateServerClient)
         {
             _clients.Add(updateServerClient.Name);
            AddLine("<b>" + updateServerClient.Name + "</b> connected!");
             UpdateClientList();
         }
 
-        private void ServerOnDisconnection(UpdateServerClient updateServerClient)
+        private void ServerOnClientDisconnected(UpdateServerClient updateServerClient)
         {
             _clients.Remove(updateServerClient.Name);
             AddLine("<b>" + updateServerClient.Name + "</b> disconnected!");

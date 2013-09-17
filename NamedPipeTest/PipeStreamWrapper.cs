@@ -22,6 +22,28 @@ namespace NamedPipeTest
             get { return BaseStream.IsConnected; }
         }
 
+        /// <summary>
+        ///     Gets a value indicating whether the current stream supports read operations.
+        /// </summary>
+        /// <returns>
+        ///     <c>true</c> if the stream supports read operations; otherwise, <c>false</c>.
+        /// </returns>
+        public bool CanRead
+        {
+            get { return BaseStream.CanRead; }
+        }
+
+        /// <summary>
+        ///     Gets a value indicating whether the current stream supports write operations.
+        /// </summary>
+        /// <returns>
+        ///     <c>true</c> if the stream supports write operations; otherwise, <c>false</c>.
+        /// </returns>
+        public bool CanWrite
+        {
+            get { return BaseStream.CanWrite; }
+        }
+
         private readonly PipeStreamReader<T> _reader;
         private readonly PipeStreamWriter<T> _writer;
 

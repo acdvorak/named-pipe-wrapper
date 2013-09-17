@@ -12,8 +12,8 @@ namespace NamedPipeTest
     {
         public const string PIPE_NAME = "bdhero_test_pipe";
 
-        public event ConnectionEventHandler Connection;
-        public event ConnectionEventHandler Disconnection;
+        public event ServerConnectionEventHandler ClientConnected;
+        public event ServerConnectionEventHandler ClientDisconnected;
         public event ServerMessageEventHandler ClientMessage;
 
         private readonly List<UpdateServerClient> _clients = new List<UpdateServerClient>();
@@ -49,11 +49,12 @@ namespace NamedPipeTest
 
                 updateServerClient = UpdateServerClient.CreateClient(server);
                 updateServerClient.ReceiveMessage += ClientOnReceiveMessage;
+                updateServerClient.Disconnected += ClientOnDisconnected;
 
                 _clients.Add(updateServerClient);
 
-                if (Connection != null)
-                    Connection(updateServerClient);
+                if (ClientConnected != null)
+                    ClientConnected(updateServerClient);
             }
             // Catch the IOException that is raised if the pipe is broken or disconnected.
             catch (Exception e)
@@ -67,8 +68,8 @@ namespace NamedPipeTest
                     ps2.Close();
                 }
 
-                if (Disconnection != null)
-                    Disconnection(updateServerClient);
+                if (ClientDisconnected != null)
+                    ClientDisconnected(updateServerClient);
             }
         }
 
@@ -76,6 +77,12 @@ namespace NamedPipeTest
         {
             if (ClientMessage != null)
                 ClientMessage(updateServerClient, message);
+        }
+
+        private void ClientOnDisconnected(UpdateServerClient updateServerClient)
+        {
+            if (ClientDisconnected != null)
+                ClientDisconnected(updateServerClient);
         }
 
         public void PushMessage(string message)
@@ -87,5 +94,5 @@ namespace NamedPipeTest
         }
     }
 
-    public delegate void ConnectionEventHandler(UpdateServerClient updateServerClient);
+    public delegate void ServerConnectionEventHandler(UpdateServerClient updateServerClient);
 }

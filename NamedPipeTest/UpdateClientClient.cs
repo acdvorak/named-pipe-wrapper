@@ -16,6 +16,7 @@ namespace NamedPipeTest
         public readonly string Name;
 
         public event ClientMessageEventHandler ReceiveMessage;
+        public event ClientConnectionEventHandler Disconnected;
 
         private readonly PipeStreamWrapper<string> _streamWrapper;
 
@@ -38,35 +39,50 @@ namespace NamedPipeTest
             ThreadPool.QueueUserWorkItem(WritePipe, null);
         }
 
+        private void OnDisconnected()
+        {
+            if (Disconnected != null)
+                Disconnected(this);
+        }
+
         private void ReadPipe(object state)
         {
-            while (_streamWrapper.IsConnected)
+            while (_streamWrapper.IsConnected && _streamWrapper.CanRead)
             {
                 var str = _streamWrapper.ReadObject();
-                if (str != null)
+                if (str == null)
+                {
+                    Close();
+                    OnDisconnected();
+                    return;
+                }
                 if (ReceiveMessage != null)
                     ReceiveMessage(this, str);
             }
-            MessageBox.Show("ReadPipe() - Disconnected");
         }
 
         private void WritePipe(object state)
         {
-            while (_streamWrapper.IsConnected)
+            while (_streamWrapper.IsConnected && _streamWrapper.CanWrite)
             {
                 _writeSignal.WaitOne();
                 while (_writeQueue.Count > 0)
                 {
                     _streamWrapper.WriteObject(_writeQueue.Dequeue());
+                    _streamWrapper.WaitForPipeDrain();
                 }
-                _streamWrapper.WaitForPipeDrain();
             }
-            MessageBox.Show("WritePipe() - Disconnected");
         }
 
         public void PushMessage(string message)
         {
             _writeQueue.Enqueue(message);
+            _writeSignal.Set();
+        }
+
+        public void Close()
+        {
+            _streamWrapper.BaseStream.Close();
             _writeSignal.Set();
         }
 
