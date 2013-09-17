@@ -8,17 +8,17 @@ using System.Threading;
 
 namespace NamedPipeTest
 {
-    public class UpdateServer
+    public class UpdateServer<T>
     {
         public const string PIPE_NAME = "bdhero_test_pipe";
 
-        public event ServerConnectionEventHandler ClientConnected;
-        public event ServerConnectionEventHandler ClientDisconnected;
-        public event ConnectionMessageEventHandler ClientMessage;
+        public event ConnectionEventHandler<T> ClientConnected;
+        public event ConnectionEventHandler<T> ClientDisconnected;
+        public event ConnectionMessageEventHandler<T> ClientMessage;
 
-        private readonly List<Connection> _clients = new List<Connection>();
+        private readonly List<Connection<T>> _clients = new List<Connection<T>>();
 
-        private int _nextPipeId = 0;
+        private int _nextPipeId;
 
         public UpdateServer()
         {
@@ -43,7 +43,7 @@ namespace NamedPipeTest
         {
             NamedPipeServerStream server = null;
             NamedPipeServerStream instance = null;
-            Connection updateServerClient = null;
+            Connection<T> updateServerClient = null;
 
             try
             {
@@ -60,7 +60,7 @@ namespace NamedPipeTest
                 instance = CreateServer(instancePipeName);
                 instance.WaitForConnection();
 
-                updateServerClient = Connection.CreateConnection(instance);
+                updateServerClient = Connection<T>.CreateConnection(instance);
                 updateServerClient.ReceiveMessage += ClientOnReceiveMessage;
                 updateServerClient.Disconnected += ClientOnDisconnected;
 
@@ -100,19 +100,19 @@ namespace NamedPipeTest
             return new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough);
         }
 
-        private void ClientOnReceiveMessage(Connection updateServerClient, string message)
+        private void ClientOnReceiveMessage(Connection<T> updateServerClient, T message)
         {
             if (ClientMessage != null)
                 ClientMessage(updateServerClient, message);
         }
 
-        private void ClientOnDisconnected(Connection updateServerClient)
+        private void ClientOnDisconnected(Connection<T> updateServerClient)
         {
             if (ClientDisconnected != null)
                 ClientDisconnected(updateServerClient);
         }
 
-        public void PushMessage(string message)
+        public void PushMessage(T message)
         {
             foreach (var client in _clients)
             {
@@ -120,6 +120,4 @@ namespace NamedPipeTest
             }
         }
     }
-
-    public delegate void ServerConnectionEventHandler(Connection updateServerClient);
 }

@@ -11,7 +11,7 @@ namespace NamedPipeTest
 {
     public partial class FormServer : Form
     {
-        private readonly UpdateServer _server = new UpdateServer();
+        private readonly UpdateServer<string> _server = new UpdateServer<string>();
         private readonly ISet<string> _clients = new HashSet<string>();
 
         public FormServer()
@@ -27,14 +27,14 @@ namespace NamedPipeTest
             _server.ClientMessage += (client, message) => AddLine("<b>" + client.Name + "</b>: " + message);
         }
 
-        private void ServerOnClientConnected(Connection updateServerClient)
+        private void ServerOnClientConnected(Connection<string> updateServerClient)
         {
             _clients.Add(updateServerClient.Name);
            AddLine("<b>" + updateServerClient.Name + "</b> connected!");
             UpdateClientList();
         }
 
-        private void ServerOnClientDisconnected(Connection updateServerClient)
+        private void ServerOnClientDisconnected(Connection<string> updateServerClient)
         {
             _clients.Remove(updateServerClient.Name);
             AddLine("<b>" + updateServerClient.Name + "</b> disconnected!");

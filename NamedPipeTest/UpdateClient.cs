@@ -8,11 +8,11 @@ using System.Threading;
 
 namespace NamedPipeTest
 {
-    public class UpdateClient
+    public class UpdateClient<T>
     {
-        private readonly List<Connection> _clients = new List<Connection>();
+        private readonly List<Connection<T>> _clients = new List<Connection<T>>();
 
-        public event ConnectionMessageEventHandler ServerMessage;
+        public event ConnectionMessageEventHandler<T> ServerMessage;
 
         public UpdateClient()
         {
@@ -21,7 +21,7 @@ namespace NamedPipeTest
 
         private void ListenAsync(object state)
         {
-            Listen(UpdateServer.PIPE_NAME);
+            Listen(UpdateServer<T>.PIPE_NAME);
         }
 
         private void Listen(string pipeName)
@@ -38,7 +38,7 @@ namespace NamedPipeTest
             var instance = CreatePipe(instancePipeName);
             instance.Connect();
 
-            var client = Connection.CreateConnection(instance);
+            var client = Connection<T>.CreateConnection(instance);
             client.ReceiveMessage += ClientOnReceiveMessage;
             _clients.Add(client);
         }
@@ -48,13 +48,13 @@ namespace NamedPipeTest
             return new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.WriteThrough);
         }
 
-        private void ClientOnReceiveMessage(Connection updateServerClient, string message)
+        private void ClientOnReceiveMessage(Connection<T> updateServerClient, T message)
         {
             if (ServerMessage != null)
                 ServerMessage(updateServerClient, message);
         }
 
-        public void PushMessage(string message)
+        public void PushMessage(T message)
         {
             foreach (var client in _clients)
             {
@@ -62,6 +62,4 @@ namespace NamedPipeTest
             }
         }
     }
-
-    public delegate void ClientConnectionEventHandler(Connection updateClientClient);
 }

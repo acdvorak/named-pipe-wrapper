@@ -11,7 +11,7 @@ namespace NamedPipeTest
 {
     public partial class FormClient : Form
     {
-        private readonly UpdateClient _updateClient = new UpdateClient();
+        private readonly UpdateClient<string> _updateClient = new UpdateClient<string>();
 
         public FormClient()
         {
@@ -24,7 +24,7 @@ namespace NamedPipeTest
             _updateClient.ServerMessage += UpdateClientOnServerMessage;
         }
 
-        private void UpdateClientOnServerMessage(Connection updateServerClient, string message)
+        private void UpdateClientOnServerMessage(Connection<string> updateServerClient, string message)
         {
             richTextBoxMessages.Invoke(new Action(delegate
                 {

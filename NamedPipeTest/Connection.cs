@@ -7,25 +7,25 @@ using System.Threading;
 
 namespace NamedPipeTest
 {
-    public class Connection
+    public class Connection<T>
     {
         public readonly int Id;
         public readonly string Name;
 
-        public event ConnectionMessageEventHandler ReceiveMessage;
-        public event ConnectionEventHandler Disconnected;
+        public event ConnectionMessageEventHandler<T> ReceiveMessage;
+        public event ConnectionEventHandler<T> Disconnected;
 
-        private readonly PipeStreamWrapper<string> _streamWrapper;
+        private readonly PipeStreamWrapper<T> _streamWrapper;
 
         private readonly AutoResetEvent _writeSignal = new AutoResetEvent(false);
-        private readonly Queue<string> _writeQueue = new Queue<string>();
+        private readonly Queue<T> _writeQueue = new Queue<T>();
 
         private Connection(int id, string name, PipeStream serverStream)
         {
             Id = id;
             Name = name;
 
-            _streamWrapper = new PipeStreamWrapper<string>(serverStream);
+            _streamWrapper = new PipeStreamWrapper<T>(serverStream);
 
             Init();
         }
@@ -71,7 +71,7 @@ namespace NamedPipeTest
             }
         }
 
-        public void PushMessage(string message)
+        public void PushMessage(T message)
         {
             _writeQueue.Enqueue(message);
             _writeSignal.Set();
@@ -87,14 +87,14 @@ namespace NamedPipeTest
 
         private static int _lastId;
 
-        public static Connection CreateConnection(PipeStream pipeStream)
+        public static Connection<T> CreateConnection(PipeStream pipeStream)
         {
-            return new Connection(++_lastId, "Client " + _lastId, pipeStream);
+            return new Connection<T>(++_lastId, "Client " + _lastId, pipeStream);
         }
 
         #endregion
     }
 
-    public delegate void ConnectionEventHandler(Connection connection);
-    public delegate void ConnectionMessageEventHandler(Connection connection, string message);
+    public delegate void ConnectionEventHandler<T>(Connection<T> connection);
+    public delegate void ConnectionMessageEventHandler<T>(Connection<T> connection, T message);
 }
