@@ -23,19 +23,19 @@ namespace NamedPipeWrapperTest
 
         private void OnLoad(object sender, EventArgs eventArgs)
         {
-            _server.ClientConnected += ServerOnClientConnected;
-            _server.ClientDisconnected += ServerOnClientDisconnected;
+            _server.ClientConnected += OnClientConnected;
+            _server.ClientDisconnected += OnClientDisconnected;
             _server.ClientMessage += (client, message) => AddLine("<b>" + client.Name + "</b>: " + message);
         }
 
-        private void ServerOnClientConnected(Connection<string> updateServerClient)
+        private void OnClientConnected(Connection<string> updateServerClient)
         {
             _clients.Add(updateServerClient.Name);
-           AddLine("<b>" + updateServerClient.Name + "</b> connected!");
+            AddLine("<b>" + updateServerClient.Name + "</b> connected!");
             UpdateClientList();
         }
 
-        private void ServerOnClientDisconnected(Connection<string> updateServerClient)
+        private void OnClientDisconnected(Connection<string> updateServerClient)
         {
             _clients.Remove(updateServerClient.Name);
             AddLine("<b>" + updateServerClient.Name + "</b> disconnected!");
@@ -52,10 +52,10 @@ namespace NamedPipeWrapperTest
 
         private void UpdateClientList()
         {
-            listBoxClients.Invoke(new Action(UpdateClientList2));
+            listBoxClients.Invoke(new Action(UpdateClientListImpl));
         }
 
-        private void UpdateClientList2()
+        private void UpdateClientListImpl()
         {
             listBoxClients.Items.Clear();
             foreach (var client in _clients)

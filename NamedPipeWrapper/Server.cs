@@ -75,8 +75,7 @@ namespace NamedPipeWrapper
                 connection.Disconnected += ClientOnDisconnected;
                 _connections.Add(connection);
 
-                if (ClientConnected != null)
-                    ClientConnected(connection);
+                ClientOnConnected(connection);
             }
             // Catch the IOException that is raised if the pipe is broken or disconnected.
             catch (Exception e)
@@ -86,9 +85,14 @@ namespace NamedPipeWrapper
                 Cleanup(handshakePipe);
                 Cleanup(dataPipe);
 
-                if (ClientDisconnected != null)
-                    ClientDisconnected(connection);
+                ClientOnDisconnected(connection);
             }
+        }
+
+        private void ClientOnConnected(Connection<T> connection)
+        {
+            if (ClientConnected != null)
+                ClientConnected(connection);
         }
 
         private void ClientOnReceiveMessage(Connection<T> connection, T message)
@@ -99,7 +103,11 @@ namespace NamedPipeWrapper
 
         private void ClientOnDisconnected(Connection<T> connection)
         {
+            if (connection == null)
+                return;
+
             _connections.Remove(connection);
+
             if (ClientDisconnected != null)
                 ClientDisconnected(connection);
         }

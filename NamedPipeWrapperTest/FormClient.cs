@@ -22,10 +22,10 @@ namespace NamedPipeWrapperTest
 
         private void OnLoad(object sender, EventArgs eventArgs)
         {
-            _client.ServerMessage += ClientOnServerMessage;
+            _client.ServerMessage += OnServerMessage;
         }
 
-        private void ClientOnServerMessage(Connection<string> updateServerClient, string message)
+        private void OnServerMessage(Connection<string> updateServerClient, string message)
         {
             richTextBoxMessages.Invoke(new Action(delegate
                 {
