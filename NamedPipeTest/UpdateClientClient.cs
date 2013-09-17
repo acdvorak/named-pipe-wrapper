@@ -43,6 +43,7 @@ namespace NamedPipeTest
             while (_streamWrapper.IsConnected)
             {
                 var str = _streamWrapper.ReadObject();
+                if (str != null)
                 if (ReceiveMessage != null)
                     ReceiveMessage(this, str);
             }
