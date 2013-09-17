@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace NamedPipeTest
 {
-    public class UpdateServer : IDisposable
+    public class UpdateServer
     {
         public const string PIPE_NAME = "bdhero_test_pipe";
 
@@ -27,33 +27,6 @@ namespace NamedPipeTest
         {
             Listen(PIPE_NAME);
         }
-
-        #region IDisposable
-
-        ~UpdateServer()
-        {
-            Dispose(false);
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-        }
-
-        protected void Dispose(bool freeManagedObjectsToo)
-        {
-            if (freeManagedObjectsToo)
-            {
-                var queue = new Queue<UpdateServerClient>(_clients);
-                foreach (var client in queue)
-                {
-                    client.Dispose();
-                }
-                _clients.Clear();
-            }
-        }
-
-        #endregion
 
         private void Listen(string pipeName)
         {

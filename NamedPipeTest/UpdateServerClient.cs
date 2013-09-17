@@ -10,14 +10,14 @@ using System.Windows.Forms;
 
 namespace NamedPipeTest
 {
-    public class UpdateServerClient : IDisposable
+    public class UpdateServerClient
     {
         public readonly int Id;
         public readonly string Name;
 
         public event ServerMessageEventHandler ReceiveMessage;
 
-        private readonly NamedPipeServerStream _serverStream;
+        private readonly PipeStreamWrapper<string> _streamWrapper;
 
         private readonly AutoResetEvent _writeSignal = new AutoResetEvent(false);
         private readonly Queue<string> _writeQueue = new Queue<string>();
@@ -26,36 +26,11 @@ namespace NamedPipeTest
         {
             Id = id;
             Name = name;
-            _serverStream = serverStream;
+
+            _streamWrapper = new PipeStreamWrapper<string>(serverStream);
 
             Init();
         }
-
-        #region IDisposable members
-
-        ~UpdateServerClient()
-        {
-            Dispose(false);
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected void Dispose(bool freeManagedResources)
-        {
-            if (freeManagedResources)
-            {
-                if (_serverStream != null)
-                {
-                    _serverStream.Dispose();
-                }
-            }
-        }
-
-        #endregion
 
         private void Init()
         {
@@ -65,17 +40,9 @@ namespace NamedPipeTest
 
         private void ReadPipe(object state)
         {
-            const int lensize = sizeof (int);
-            var lenbuf = new byte[lensize];
-            while (_serverStream.IsConnected)
+            while (_streamWrapper.IsConnected)
             {
-                _serverStream.Read(lenbuf, 0, 4);
-                var len = IPAddress.NetworkToHostOrder(BitConverter.ToInt32(lenbuf, 0));
-                if (len == 0)
-                    return;
-                var data = new byte[len];
-                _serverStream.Read(data, 0, len);
-                var str = Encoding.UTF8.GetString(data);
+                var str = _streamWrapper.ReadObject();
                 if (ReceiveMessage != null)
                     ReceiveMessage(this, str);
             }
@@ -84,19 +51,14 @@ namespace NamedPipeTest
 
         private void WritePipe(object state)
         {
-            while (_serverStream.IsConnected)
+            while (_streamWrapper.IsConnected)
             {
                 _writeSignal.WaitOne();
                 while (_writeQueue.Count > 0)
                 {
-                    var str = _writeQueue.Dequeue();
-                    var data = Encoding.UTF8.GetBytes(str);
-                    var lenbuf = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(data.Length));
-                    _serverStream.Write(lenbuf, 0, lenbuf.Length);
-                    _serverStream.Write(data, 0, data.Length);
-                    _serverStream.Flush();
+                    _streamWrapper.WriteObject(_writeQueue.Dequeue());
                 }
-                _serverStream.WaitForPipeDrain();
+                _streamWrapper.WaitForPipeDrain();
             }
             MessageBox.Show("WritePipe() - Disconnected");
         }

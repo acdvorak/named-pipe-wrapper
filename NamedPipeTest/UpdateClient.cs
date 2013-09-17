@@ -24,33 +24,6 @@ namespace NamedPipeTest
             Listen(UpdateServer.PIPE_NAME);
         }
 
-        #region IDisposable
-
-        ~UpdateClient()
-        {
-            Dispose(false);
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-        }
-
-        protected void Dispose(bool freeManagedObjectsToo)
-        {
-            if (freeManagedObjectsToo)
-            {
-                var queue = new Queue<UpdateClientClient>(_clients);
-                foreach (var client in queue)
-                {
-                    client.Dispose();
-                }
-                _clients.Clear();
-            }
-        }
-
-        #endregion
-
         private void Listen(string pipeName)
         {
             NamedPipeClientStream pipeClient = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.WriteThrough);
