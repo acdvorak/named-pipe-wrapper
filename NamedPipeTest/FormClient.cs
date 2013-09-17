@@ -11,7 +11,7 @@ namespace NamedPipeTest
 {
     public partial class FormClient : Form
     {
-        private readonly UpdateClient<string> _updateClient = new UpdateClient<string>();
+        private readonly Client<string> _client = new Client<string>();
 
         public FormClient()
         {
@@ -21,10 +21,10 @@ namespace NamedPipeTest
 
         private void OnLoad(object sender, EventArgs eventArgs)
         {
-            _updateClient.ServerMessage += UpdateClientOnServerMessage;
+            _client.ServerMessage += ClientOnServerMessage;
         }
 
-        private void UpdateClientOnServerMessage(Connection<string> updateServerClient, string message)
+        private void ClientOnServerMessage(Connection<string> updateServerClient, string message)
         {
             richTextBoxMessages.Invoke(new Action(delegate
                 {
@@ -45,7 +45,7 @@ namespace NamedPipeTest
             if (string.IsNullOrWhiteSpace(textBoxMessage.Text))
                 return;
 
-            _updateClient.PushMessage(textBoxMessage.Text);
+            _client.PushMessage(textBoxMessage.Text);
             textBoxMessage.Text = "";
         }
     }

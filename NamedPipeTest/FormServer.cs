@@ -11,7 +11,7 @@ namespace NamedPipeTest
 {
     public partial class FormServer : Form
     {
-        private readonly UpdateServer<string> _server = new UpdateServer<string>();
+        private readonly Server<string> _server = new Server<string>();
         private readonly ISet<string> _clients = new HashSet<string>();
 
         public FormServer()

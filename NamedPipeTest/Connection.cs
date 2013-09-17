@@ -20,7 +20,7 @@ namespace NamedPipeTest
         private readonly AutoResetEvent _writeSignal = new AutoResetEvent(false);
         private readonly Queue<T> _writeQueue = new Queue<T>();
 
-        private Connection(int id, string name, PipeStream serverStream)
+        internal Connection(int id, string name, PipeStream serverStream)
         {
             Id = id;
             Name = name;
@@ -82,17 +82,16 @@ namespace NamedPipeTest
             _streamWrapper.Close();
             _writeSignal.Set();
         }
+    }
 
-        #region Factory
-
+    static class ConnectionFactory
+    {
         private static int _lastId;
 
-        public static Connection<T> CreateConnection(PipeStream pipeStream)
+        public static Connection<T> CreateConnection<T>(PipeStream pipeStream) where T : class
         {
             return new Connection<T>(++_lastId, "Client " + _lastId, pipeStream);
         }
-
-        #endregion
     }
 
     public delegate void ConnectionEventHandler<T>(Connection<T> connection) where T : class;

@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Connection.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="PipeStreamReader.cs" />
     <Compile Include="PipeStreamWrapper.cs" />
     <Compile Include="PipeStreamWriter.cs" />
@@ -71,8 +72,8 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UpdateClient.cs" />
-    <Compile Include="UpdateServer.cs" />
+    <Compile Include="Client.cs" />
+    <Compile Include="Server.cs" />
     <EmbeddedResource Include="FormClient.resx">
       <DependentUpon>FormClient.cs</DependentUpon>
     </EmbeddedResource>
