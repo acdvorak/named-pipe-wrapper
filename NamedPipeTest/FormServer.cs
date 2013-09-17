@@ -27,14 +27,14 @@ namespace NamedPipeTest
             _server.ClientMessage += (client, message) => AddLine("<b>" + client.Name + "</b>: " + message);
         }
 
-        private void ServerOnClientConnected(UpdateServerClient updateServerClient)
+        private void ServerOnClientConnected(Connection updateServerClient)
         {
             _clients.Add(updateServerClient.Name);
            AddLine("<b>" + updateServerClient.Name + "</b> connected!");
             UpdateClientList();
         }
 
-        private void ServerOnClientDisconnected(UpdateServerClient updateServerClient)
+        private void ServerOnClientDisconnected(Connection updateServerClient)
         {
             _clients.Remove(updateServerClient.Name);
             AddLine("<b>" + updateServerClient.Name + "</b> disconnected!");

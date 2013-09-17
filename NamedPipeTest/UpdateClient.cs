@@ -10,9 +10,9 @@ namespace NamedPipeTest
 {
     public class UpdateClient
     {
-        private readonly List<UpdateClientClient> _clients = new List<UpdateClientClient>();
+        private readonly List<Connection> _clients = new List<Connection>();
 
-        public event ClientMessageEventHandler ServerMessage;
+        public event ConnectionMessageEventHandler ServerMessage;
 
         public UpdateClient()
         {
@@ -38,7 +38,7 @@ namespace NamedPipeTest
             var instance = CreatePipe(instancePipeName);
             instance.Connect();
 
-            var client = UpdateClientClient.CreateClient(instance);
+            var client = Connection.CreateConnection(instance);
             client.ReceiveMessage += ClientOnReceiveMessage;
             _clients.Add(client);
         }
@@ -48,7 +48,7 @@ namespace NamedPipeTest
             return new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.WriteThrough);
         }
 
-        private void ClientOnReceiveMessage(UpdateClientClient updateServerClient, string message)
+        private void ClientOnReceiveMessage(Connection updateServerClient, string message)
         {
             if (ServerMessage != null)
                 ServerMessage(updateServerClient, message);
@@ -63,5 +63,5 @@ namespace NamedPipeTest
         }
     }
 
-    public delegate void ClientConnectionEventHandler(UpdateClientClient updateClientClient);
+    public delegate void ClientConnectionEventHandler(Connection updateClientClient);
 }

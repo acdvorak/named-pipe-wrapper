@@ -1,29 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.IO.Pipes;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading;
-using System.Windows.Forms;
 
 namespace NamedPipeTest
 {
-    public class UpdateServerClient
+    public class Connection
     {
         public readonly int Id;
         public readonly string Name;
 
-        public event ServerMessageEventHandler ReceiveMessage;
-        public event ServerConnectionEventHandler Disconnected;
+        public event ConnectionMessageEventHandler ReceiveMessage;
+        public event ConnectionEventHandler Disconnected;
 
         private readonly PipeStreamWrapper<string> _streamWrapper;
 
         private readonly AutoResetEvent _writeSignal = new AutoResetEvent(false);
         private readonly Queue<string> _writeQueue = new Queue<string>();
 
-        private UpdateServerClient(int id, string name, NamedPipeServerStream serverStream)
+        private Connection(int id, string name, PipeStream serverStream)
         {
             Id = id;
             Name = name;
@@ -90,13 +87,14 @@ namespace NamedPipeTest
 
         private static int _lastId;
 
-        public static UpdateServerClient CreateClient(NamedPipeServerStream serverStream)
+        public static Connection CreateConnection(PipeStream pipeStream)
         {
-            return new UpdateServerClient(++_lastId, "Client " + _lastId, serverStream);
+            return new Connection(++_lastId, "Client " + _lastId, pipeStream);
         }
 
         #endregion
     }
 
-    public delegate void ServerMessageEventHandler(UpdateServerClient updateServerClient, string message);
+    public delegate void ConnectionEventHandler(Connection connection);
+    public delegate void ConnectionMessageEventHandler(Connection connection, string message);
 }

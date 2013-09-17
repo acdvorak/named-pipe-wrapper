@@ -24,7 +24,7 @@ namespace NamedPipeTest
             _updateClient.ServerMessage += UpdateClientOnServerMessage;
         }
 
-        private void UpdateClientOnServerMessage(UpdateClientClient updateServerClient, string message)
+        private void UpdateClientOnServerMessage(Connection updateServerClient, string message)
         {
             richTextBoxMessages.Invoke(new Action(delegate
                 {

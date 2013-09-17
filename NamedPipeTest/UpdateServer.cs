@@ -14,9 +14,9 @@ namespace NamedPipeTest
 
         public event ServerConnectionEventHandler ClientConnected;
         public event ServerConnectionEventHandler ClientDisconnected;
-        public event ServerMessageEventHandler ClientMessage;
+        public event ConnectionMessageEventHandler ClientMessage;
 
-        private readonly List<UpdateServerClient> _clients = new List<UpdateServerClient>();
+        private readonly List<Connection> _clients = new List<Connection>();
 
         private int _nextPipeId = 0;
 
@@ -43,7 +43,7 @@ namespace NamedPipeTest
         {
             NamedPipeServerStream server = null;
             NamedPipeServerStream instance = null;
-            UpdateServerClient updateServerClient = null;
+            Connection updateServerClient = null;
 
             try
             {
@@ -60,7 +60,7 @@ namespace NamedPipeTest
                 instance = CreateServer(instancePipeName);
                 instance.WaitForConnection();
 
-                updateServerClient = UpdateServerClient.CreateClient(instance);
+                updateServerClient = Connection.CreateConnection(instance);
                 updateServerClient.ReceiveMessage += ClientOnReceiveMessage;
                 updateServerClient.Disconnected += ClientOnDisconnected;
 
@@ -100,13 +100,13 @@ namespace NamedPipeTest
             return new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough);
         }
 
-        private void ClientOnReceiveMessage(UpdateServerClient updateServerClient, string message)
+        private void ClientOnReceiveMessage(Connection updateServerClient, string message)
         {
             if (ClientMessage != null)
                 ClientMessage(updateServerClient, message);
         }
 
-        private void ClientOnDisconnected(UpdateServerClient updateServerClient)
+        private void ClientOnDisconnected(Connection updateServerClient)
         {
             if (ClientDisconnected != null)
                 ClientDisconnected(updateServerClient);
@@ -121,5 +121,5 @@ namespace NamedPipeTest
         }
     }
 
-    public delegate void ServerConnectionEventHandler(UpdateServerClient updateServerClient);
+    public delegate void ServerConnectionEventHandler(Connection updateServerClient);
 }
