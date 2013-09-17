@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace NamedPipeTest
 {
-    public class Connection<T>
+    public class Connection<T> where T : class
     {
         public readonly int Id;
         public readonly string Name;
@@ -95,6 +95,6 @@ namespace NamedPipeTest
         #endregion
     }
 
-    public delegate void ConnectionEventHandler<T>(Connection<T> connection);
-    public delegate void ConnectionMessageEventHandler<T>(Connection<T> connection, T message);
+    public delegate void ConnectionEventHandler<T>(Connection<T> connection) where T : class;
+    public delegate void ConnectionMessageEventHandler<T>(Connection<T> connection, T message) where T : class;
 }

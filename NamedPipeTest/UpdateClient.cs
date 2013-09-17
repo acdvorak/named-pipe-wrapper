@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace NamedPipeTest
 {
-    public class UpdateClient<T>
+    public class UpdateClient<T> where T : class
     {
         private readonly List<Connection<T>> _clients = new List<Connection<T>>();
 

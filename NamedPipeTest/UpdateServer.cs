@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace NamedPipeTest
 {
-    public class UpdateServer<T>
+    public class UpdateServer<T> where T : class
     {
         public const string PIPE_NAME = "bdhero_test_pipe";
 
