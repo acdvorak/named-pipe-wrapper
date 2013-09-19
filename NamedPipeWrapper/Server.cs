@@ -42,6 +42,14 @@ namespace NamedPipeWrapper
             }
         }
 
+        public void Stop()
+        {
+            foreach (var client in _connections)
+            {
+                client.Close();
+            }
+        }
+
         #region Private methods
 
         private void ListenSync()

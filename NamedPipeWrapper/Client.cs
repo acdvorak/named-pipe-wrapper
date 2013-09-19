@@ -40,6 +40,12 @@ namespace NamedPipeWrapper
                 _connection.PushMessage(message);
         }
 
+        public void Stop()
+        {
+            if (_connection != null)
+                _connection.Close();
+        }
+
         #region Private methods
 
         private void ListenSync()
