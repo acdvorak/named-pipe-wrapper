@@ -26,6 +26,7 @@ namespace NamedPipeWrapperTest
             _server.ClientConnected += OnClientConnected;
             _server.ClientDisconnected += OnClientDisconnected;
             _server.ClientMessage += (client, message) => AddLine("<b>" + client.Name + "</b>: " + message);
+            _server.Start();
         }
 
         private void OnClientConnected(Connection<string> connection)

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using NamedPipeWrapper.IO;
+using NamedPipeWrapper.Threading;
 
 namespace NamedPipeWrapper
 {
@@ -14,14 +15,23 @@ namespace NamedPipeWrapper
         public event ConnectionEventHandler<T> ClientConnected;
         public event ConnectionEventHandler<T> ClientDisconnected;
         public event ConnectionMessageEventHandler<T> ClientMessage;
+        public event PipeExceptionEventHandler Error;
 
+        private readonly string _pipeName;
         private readonly List<Connection<T>> _connections = new List<Connection<T>>();
 
         private int _nextPipeId;
 
         public Server(string pipeName)
         {
-            ThreadPool.QueueUserWorkItem(ListenAsync, pipeName);
+            _pipeName = pipeName;
+        }
+
+        public void Start()
+        {
+            var worker = new Worker();
+            worker.Error += OnError;
+            worker.DoWork(ListenSync);
         }
 
         public void PushMessage(T message)
@@ -34,17 +44,12 @@ namespace NamedPipeWrapper
 
         #region Private methods
 
-        private void ListenAsync(object pipeName)
-        {
-            ListenSync((string) pipeName);
-        }
-
-        private void ListenSync(string pipeName)
+        private void ListenSync()
         {
             //
             while (true)
             {
-                WaitForConnection(pipeName);
+                WaitForConnection(_pipeName);
             }
         }
 
@@ -73,6 +78,7 @@ namespace NamedPipeWrapper
                 connection = ConnectionFactory.CreateConnection<T>(dataPipe);
                 connection.ReceiveMessage += ClientOnReceiveMessage;
                 connection.Disconnected += ClientOnDisconnected;
+                connection.Open();
                 _connections.Add(connection);
 
                 ClientOnConnected(connection);
@@ -110,6 +116,16 @@ namespace NamedPipeWrapper
 
             if (ClientDisconnected != null)
                 ClientDisconnected(connection);
+        }
+
+        /// <summary>
+        ///     Invoked on the UI thread.
+        /// </summary>
+        /// <param name="exception"></param>
+        private void OnError(Exception exception)
+        {
+            if (Error != null)
+                Error(exception);
         }
 
         private string GetNextConnectionPipeName(string pipeName)

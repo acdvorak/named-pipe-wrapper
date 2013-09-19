@@ -6,18 +6,28 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using NamedPipeWrapper.IO;
+using NamedPipeWrapper.Threading;
 
 namespace NamedPipeWrapper
 {
     public class Client<T> where T : class
     {
+        private readonly string _pipeName;
         private Connection<T> _connection;
 
         public event ConnectionMessageEventHandler<T> ServerMessage;
+        public event PipeExceptionEventHandler Error;
 
         public Client(string pipeName)
         {
-            ThreadPool.QueueUserWorkItem(ListenAsync, pipeName);
+            _pipeName = pipeName;
+        }
+
+        public void Start()
+        {
+            var worker = new Worker();
+            worker.Error += OnError;
+            worker.DoWork(ListenSync);
         }
 
         /// <summary>
@@ -32,15 +42,10 @@ namespace NamedPipeWrapper
 
         #region Private methods
 
-        private void ListenAsync(object pipeName)
-        {
-            ListenSync((string) pipeName);
-        }
-
-        private void ListenSync(string pipeName)
+        private void ListenSync()
         {
             // Get the name of the data pipe that should be used from now on by this Client
-            var handshake = PipeClientFactory.Connect<string>(pipeName);
+            var handshake = PipeClientFactory.Connect<string>(_pipeName);
             var dataPipeName = handshake.ReadObject();
             handshake.Close();
 
@@ -56,6 +61,16 @@ namespace NamedPipeWrapper
         {
             if (ServerMessage != null)
                 ServerMessage(connection, message);
+        }
+
+        /// <summary>
+        ///     Invoked on the UI thread.
+        /// </summary>
+        /// <param name="exception"></param>
+        private void OnError(Exception exception)
+        {
+            if (Error != null)
+                Error(exception);
         }
 
         #endregion

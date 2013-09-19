@@ -23,6 +23,7 @@ namespace NamedPipeWrapperTest
         private void OnLoad(object sender, EventArgs eventArgs)
         {
             _client.ServerMessage += OnServerMessage;
+            _client.Start();
         }
 
         private void OnServerMessage(Connection<string> connection, string message)
