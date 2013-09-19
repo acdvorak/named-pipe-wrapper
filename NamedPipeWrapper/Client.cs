@@ -52,10 +52,10 @@ namespace NamedPipeWrapper
             _connection.ReceiveMessage += ClientOnReceiveMessage;
         }
 
-        private void ClientOnReceiveMessage(Connection<T> updateServerClient, T message)
+        private void ClientOnReceiveMessage(Connection<T> connection, T message)
         {
             if (ServerMessage != null)
-                ServerMessage(updateServerClient, message);
+                ServerMessage(connection, message);
         }
 
         #endregion

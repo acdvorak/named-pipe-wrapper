@@ -25,7 +25,7 @@ namespace NamedPipeWrapperTest
             _client.ServerMessage += OnServerMessage;
         }
 
-        private void OnServerMessage(Connection<string> updateServerClient, string message)
+        private void OnServerMessage(Connection<string> connection, string message)
         {
             richTextBoxMessages.Invoke(new Action(delegate
                 {

@@ -28,17 +28,17 @@ namespace NamedPipeWrapperTest
             _server.ClientMessage += (client, message) => AddLine("<b>" + client.Name + "</b>: " + message);
         }
 
-        private void OnClientConnected(Connection<string> updateServerClient)
+        private void OnClientConnected(Connection<string> connection)
         {
-            _clients.Add(updateServerClient.Name);
-            AddLine("<b>" + updateServerClient.Name + "</b> connected!");
+            _clients.Add(connection.Name);
+            AddLine("<b>" + connection.Name + "</b> connected!");
             UpdateClientList();
         }
 
-        private void OnClientDisconnected(Connection<string> updateServerClient)
+        private void OnClientDisconnected(Connection<string> connection)
         {
-            _clients.Remove(updateServerClient.Name);
-            AddLine("<b>" + updateServerClient.Name + "</b> disconnected!");
+            _clients.Remove(connection.Name);
+            AddLine("<b>" + connection.Name + "</b> disconnected!");
             UpdateClientList();
         }
 
