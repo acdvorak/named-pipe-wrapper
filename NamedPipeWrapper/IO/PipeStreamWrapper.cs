@@ -19,7 +19,7 @@ namespace NamedPipeWrapper.IO
         /// </returns>
         public bool IsConnected
         {
-            get { return BaseStream.IsConnected; }
+            get { return BaseStream.IsConnected && _reader.IsConnected; }
         }
 
         /// <summary>
