@@ -55,6 +55,7 @@ namespace NamedPipeWrapper
             // Create a Connection object for the data pipe
             _connection = ConnectionFactory.CreateConnection<T>(dataPipe);
             _connection.ReceiveMessage += ClientOnReceiveMessage;
+            _connection.Open();
         }
 
         private void ClientOnReceiveMessage(Connection<T> connection, T message)
