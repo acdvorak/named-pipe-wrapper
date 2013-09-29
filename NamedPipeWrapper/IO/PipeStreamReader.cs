@@ -9,13 +9,29 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace NamedPipeWrapper.IO
 {
+    /// <summary>
+    /// Wraps a <see cref="PipeStream"/> object and reads from it.  Deserializes binary data sent by a <see cref="PipeStreamWriter{T}"/>
+    /// into a .NET CLR object specified by <typeparamref name="T"/>.
+    /// </summary>
+    /// <typeparam name="T">Reference type to deserialize data to</typeparam>
     public class PipeStreamReader<T> where T : class
     {
+        /// <summary>
+        /// Gets the underlying <c>PipeStream</c> object.
+        /// </summary>
         public PipeStream BaseStream { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the pipe is connected or not.
+        /// </summary>
         public bool IsConnected { get; private set; }
 
         private readonly BinaryFormatter _binaryFormatter = new BinaryFormatter();
 
+        /// <summary>
+        /// Constructs a new <c>PipeStreamReader</c> object that reads data from the given <paramref name="stream"/>.
+        /// </summary>
+        /// <param name="stream">Pipe to read from</param>
         public PipeStreamReader(PipeStream stream)
         {
             BaseStream = stream;
@@ -58,6 +74,11 @@ namespace NamedPipeWrapper.IO
 
         #endregion
 
+        /// <summary>
+        /// Reads the next object from the pipe.  This method blocks until an object is sent
+        /// or the pipe is disconnected.
+        /// </summary>
+        /// <returns>The next object read from the pipe, or <c>null</c> if the pipe disconnected.</returns>
         /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
         public T ReadObject()
         {

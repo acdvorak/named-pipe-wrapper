@@ -9,19 +9,38 @@ using NamedPipeWrapper.Threading;
 
 namespace NamedPipeWrapper
 {
+    /// <summary>
+    /// Wraps a <see cref="NamedPipeClientStream"/>.
+    /// </summary>
+    /// <typeparam name="T">Reference type to read from and write to the named pipe</typeparam>
     public class Client<T> where T : class
     {
         private readonly string _pipeName;
         private Connection<T> _connection;
 
+        /// <summary>
+        /// Invoked whenever a message is received from the server.
+        /// </summary>
         public event ConnectionMessageEventHandler<T> ServerMessage;
+
+        /// <summary>
+        /// Invoked whenever an exception is thrown during a read or write operation on the named pipe.
+        /// </summary>
         public event PipeExceptionEventHandler Error;
 
+        /// <summary>
+        /// Constructs a new <c>Client</c> to connect to the <see cref="Server{T}"/> specified by <paramref name="pipeName"/>.
+        /// </summary>
+        /// <param name="pipeName">Name of the server's pipe</param>
         public Client(string pipeName)
         {
             _pipeName = pipeName;
         }
 
+        /// <summary>
+        /// Connects to the named pipe server asynchronously.
+        /// This method returns immediately, possibly before the connection has been established.
+        /// </summary>
         public void Start()
         {
             var worker = new Worker();
@@ -39,6 +58,9 @@ namespace NamedPipeWrapper
                 _connection.PushMessage(message);
         }
 
+        /// <summary>
+        /// Closes the named pipe.
+        /// </summary>
         public void Stop()
         {
             if (_connection != null)

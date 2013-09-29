@@ -9,11 +9,30 @@ using NamedPipeWrapper.Threading;
 
 namespace NamedPipeWrapper
 {
+    /// <summary>
+    /// Wraps a <see cref="NamedPipeServerStream"/> and provides multiple simultaneous client connection handling.
+    /// </summary>
+    /// <typeparam name="T">Reference type to read from and write to the named pipe</typeparam>
     public class Server<T> where T : class
     {
+        /// <summary>
+        /// Invoked whenever a client connects to the server.
+        /// </summary>
         public event ConnectionEventHandler<T> ClientConnected;
+
+        /// <summary>
+        /// Invoked whenever a client disconnects from the server.
+        /// </summary>
         public event ConnectionEventHandler<T> ClientDisconnected;
+
+        /// <summary>
+        /// Invoked whenever a client sends a message to the server.
+        /// </summary>
         public event ConnectionMessageEventHandler<T> ClientMessage;
+
+        /// <summary>
+        /// Invoked whenever an exception is thrown during a read or write operation.
+        /// </summary>
         public event PipeExceptionEventHandler Error;
 
         private readonly string _pipeName;
@@ -21,11 +40,19 @@ namespace NamedPipeWrapper
 
         private int _nextPipeId;
 
+        /// <summary>
+        /// Constructs a new <c>Server</c> object that listens for client connections on the given <paramref name="pipeName"/>.
+        /// </summary>
+        /// <param name="pipeName">Name of the pipe to listen on</param>
         public Server(string pipeName)
         {
             _pipeName = pipeName;
         }
 
+        /// <summary>
+        /// Begins listening for client connections in a separate background thread.
+        /// This method returns immediately.
+        /// </summary>
         public void Start()
         {
             var worker = new Worker();
@@ -33,6 +60,11 @@ namespace NamedPipeWrapper
             worker.DoWork(ListenSync);
         }
 
+        /// <summary>
+        /// Sends a message to all connected clients asynchronously.
+        /// This method returns immediately, possibly before the message has been sent to all clients.
+        /// </summary>
+        /// <param name="message"></param>
         public void PushMessage(T message)
         {
             foreach (var client in _connections)
@@ -41,6 +73,9 @@ namespace NamedPipeWrapper
             }
         }
 
+        /// <summary>
+        /// Closes all open client connections.
+        /// </summary>
         public void Stop()
         {
             foreach (var client in _connections)
