@@ -86,6 +86,7 @@ namespace NamedPipeWrapper
                 connection = ConnectionFactory.CreateConnection<T>(dataPipe);
                 connection.ReceiveMessage += ClientOnReceiveMessage;
                 connection.Disconnected += ClientOnDisconnected;
+                connection.Error += ConnectionOnError;
                 connection.Open();
                 _connections.Add(connection);
 
@@ -124,6 +125,14 @@ namespace NamedPipeWrapper
 
             if (ClientDisconnected != null)
                 ClientDisconnected(connection);
+        }
+
+        /// <summary>
+        ///     Invoked on the UI thread.
+        /// </summary>
+        private void ConnectionOnError(Connection<T> connection, Exception exception)
+        {
+            OnError(exception);
         }
 
         /// <summary>

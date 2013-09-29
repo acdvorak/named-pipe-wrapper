@@ -61,6 +61,7 @@ namespace NamedPipeWrapper
             // Create a Connection object for the data pipe
             _connection = ConnectionFactory.CreateConnection<T>(dataPipe);
             _connection.ReceiveMessage += ClientOnReceiveMessage;
+            _connection.Error += ConnectionOnError;
             _connection.Open();
         }
 
@@ -68,6 +69,14 @@ namespace NamedPipeWrapper
         {
             if (ServerMessage != null)
                 ServerMessage(connection, message);
+        }
+
+        /// <summary>
+        ///     Invoked on the UI thread.
+        /// </summary>
+        private void ConnectionOnError(Connection<T> connection, Exception exception)
+        {
+            OnError(exception);
         }
 
         /// <summary>
