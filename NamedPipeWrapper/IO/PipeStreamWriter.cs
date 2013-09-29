@@ -52,7 +52,7 @@ namespace NamedPipeWrapper.IO
 
         private void WriteObject(byte[] data)
         {
-            BaseStream.Write(data.ToArray(), 0, data.Length);
+            BaseStream.Write(data, 0, data.Length);
         }
 
         private void Flush()
