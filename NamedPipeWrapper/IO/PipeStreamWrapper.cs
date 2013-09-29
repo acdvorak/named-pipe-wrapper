@@ -8,7 +8,7 @@ using System.Text;
 
 namespace NamedPipeWrapper.IO
 {
-    public class PipeStreamWrapper<T>
+    public class PipeStreamWrapper<T> where T : class
     {
         public PipeStream BaseStream { get; private set; }
 

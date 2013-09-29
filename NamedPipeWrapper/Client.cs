@@ -93,7 +93,7 @@ namespace NamedPipeWrapper
 
     static class PipeClientFactory
     {
-        public static PipeStreamWrapper<T> Connect<T>(string pipeName)
+        public static PipeStreamWrapper<T> Connect<T>(string pipeName) where T : class
         {
             return new PipeStreamWrapper<T>(CreateAndConnectPipe(pipeName));
         }

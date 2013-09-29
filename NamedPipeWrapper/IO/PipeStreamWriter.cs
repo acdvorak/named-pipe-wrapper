@@ -9,7 +9,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace NamedPipeWrapper.IO
 {
-    public class PipeStreamWriter<T>
+    public class PipeStreamWriter<T> where T : class
     {
         public PipeStream BaseStream { get; private set; }
 
