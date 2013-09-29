@@ -1,9 +1,56 @@
-# TODO
+# Named Pipe Wrapper for .NET 4.0
 
-[X]  1.  Exception handling
-[X]  2.  Callback thread
-[-]  3.  Test buffer size / memory limits (~300 MB fails after 20 seconds; not sure why)
-[ ]  4.  Test sync vs. async
-[ ]  5.  Test object serialization / deserialization
-[ ]  6.  Test cyclical object graphs
-[X]  7.  Test PipeStreamReader when zero bytes are sent (disconnect vs. empty payload)
+A simple, easy to use, strongly-typed wrapper around .NET named pipes.
+
+# Features
+
+*  Create named pipe servers that can handle multiple client connections simultaneously.
+*  Send strongly-typed messages between clients and servers: any serializable .NET object can be sent over a pipe and will be automatically serialized/deserialized, including cyclical references and complex object graphs.
+*  Messages are sent and received asynchronously on a separate background thread and marshalled back to the calling thread (typically the UI).
+*  Supports large messages - up to 300 MiB.
+
+# Requirements
+
+Requires .NET 4.0 full.
+
+# Usage
+
+Server:
+
+```csharp
+var server = new Server<SomeClass>("MyServerPipe");
+
+server.ClientConnected += delegate(Connection<SomeClass> conn)
+    {
+        Console.WriteLine("Client {0} is now connected!", conn.Id);
+        conn.PushMessage(new SomeClass { Text: "Welcome!" });
+    };
+
+server.ClientMessage += delegate(Connection<SomeClass> conn, SomeClass message)
+    {
+        Console.WriteLine("Client {0} says: {1}", conn.Id, message.Text);
+    };
+
+// Start up the server asynchronously and begin listening for connections.
+// This method will return immediately while the server runs in a separate background thread.
+server.Start();
+
+// ...
+```
+
+Client:
+
+```csharp
+var client = new Client<SomeClass>("MyServerPipe");
+
+client.ServerMessage += delegate(Connection<SomeClass> conn, SomeClass message)
+    {
+        Console.WriteLine("Server says: {0}", message.Text);
+    };
+
+// Start up the client asynchronously and connect to the specified server pipe.
+// This method will return immediately while the client runs in a separate background thread.
+client.Start();
+
+// ...
+```
