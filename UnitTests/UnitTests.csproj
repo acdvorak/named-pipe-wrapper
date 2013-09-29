@@ -38,6 +38,7 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="SerializableTests.cs" />
     <Compile Include="DataTests.cs" />
   </ItemGroup>
   <ItemGroup>
