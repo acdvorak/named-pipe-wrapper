@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Pipes;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using NamedPipeWrapper.IO;
 using NamedPipeWrapper.Threading;
 
@@ -15,18 +16,26 @@ namespace NamedPipeWrapper
     /// <typeparam name="T">Reference type to read from and write to the named pipe</typeparam>
     public class Client<T> where T : class
     {
-        private readonly string _pipeName;
-        private Connection<T> _connection;
-
         /// <summary>
         /// Invoked whenever a message is received from the server.
         /// </summary>
         public event ConnectionMessageEventHandler<T> ServerMessage;
 
         /// <summary>
+        /// Invoked when the client disconnects from the server (e.g., the pipe is closed or broken).
+        /// </summary>
+        public event ConnectionEventHandler<T> Disconnected;
+
+        /// <summary>
         /// Invoked whenever an exception is thrown during a read or write operation on the named pipe.
         /// </summary>
         public event PipeExceptionEventHandler Error;
+
+        private readonly string _pipeName;
+        private Connection<T> _connection;
+
+        private readonly AutoResetEvent _connected = new AutoResetEvent(false);
+        private readonly AutoResetEvent _disconnected = new AutoResetEvent(false);
 
         /// <summary>
         /// Constructs a new <c>Client</c> to connect to the <see cref="Server{T}"/> specified by <paramref name="pipeName"/>.
@@ -67,6 +76,40 @@ namespace NamedPipeWrapper
                 _connection.Close();
         }
 
+        #region Wait for connection/disconnection
+
+        public void WaitForConnection()
+        {
+            _connected.WaitOne();
+        }
+
+        public void WaitForConnection(int millisecondsTimeout)
+        {
+            _connected.WaitOne(millisecondsTimeout);
+        }
+
+        public void WaitForConnection(TimeSpan timeout)
+        {
+            _connected.WaitOne(timeout);
+        }
+
+        public void WaitForDisconnection()
+        {
+            _disconnected.WaitOne();
+        }
+
+        public void WaitForDisconnection(int millisecondsTimeout)
+        {
+            _disconnected.WaitOne(millisecondsTimeout);
+        }
+
+        public void WaitForDisconnection(TimeSpan timeout)
+        {
+            _disconnected.WaitOne(timeout);
+        }
+
+        #endregion
+
         #region Private methods
 
         private void ListenSync()
@@ -81,12 +124,22 @@ namespace NamedPipeWrapper
 
             // Create a Connection object for the data pipe
             _connection = ConnectionFactory.CreateConnection<T>(dataPipe);
-            _connection.ReceiveMessage += ClientOnReceiveMessage;
+            _connection.Disconnected += OnDisconnected;
+            _connection.ReceiveMessage += OnReceiveMessage;
             _connection.Error += ConnectionOnError;
             _connection.Open();
+
+            _connected.Set();
         }
 
-        private void ClientOnReceiveMessage(Connection<T> connection, T message)
+        private void OnDisconnected(Connection<T> connection)
+        {
+            if (Disconnected != null)
+                Disconnected(connection);
+            _disconnected.Set();
+        }
+
+        private void OnReceiveMessage(Connection<T> connection, T message)
         {
             if (ServerMessage != null)
                 ServerMessage(connection, message);

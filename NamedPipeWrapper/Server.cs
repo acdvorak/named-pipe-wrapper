@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Pipes;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using NamedPipeWrapper.IO;
 using NamedPipeWrapper.Threading;
 
@@ -40,6 +41,9 @@ namespace NamedPipeWrapper
 
         private int _nextPipeId;
 
+        private volatile bool _shouldKeepRunning;
+        private volatile bool _isRunning;
+
         /// <summary>
         /// Constructs a new <c>Server</c> object that listens for client connections on the given <paramref name="pipeName"/>.
         /// </summary>
@@ -55,6 +59,7 @@ namespace NamedPipeWrapper
         /// </summary>
         public void Start()
         {
+            _shouldKeepRunning = true;
             var worker = new Worker();
             worker.Error += OnError;
             worker.DoWork(ListenSync);
@@ -67,32 +72,49 @@ namespace NamedPipeWrapper
         /// <param name="message"></param>
         public void PushMessage(T message)
         {
-            foreach (var client in _connections)
+            lock (_connections)
             {
-                client.PushMessage(message);
+                foreach (var client in _connections)
+                {
+                    client.PushMessage(message);
+                }
             }
         }
 
         /// <summary>
-        /// Closes all open client connections.
+        /// Closes all open client connections and stops listening for new ones.
         /// </summary>
         public void Stop()
         {
-            foreach (var client in _connections)
+            _shouldKeepRunning = false;
+
+            lock (_connections)
             {
-                client.Close();
+                foreach (var client in _connections.ToArray())
+                {
+                    client.Close();
+                }
             }
+
+            // If background thread is still listening for a client to connect,
+            // initiate a dummy connection that will allow the thread to exit.
+            var dummyClient = new Client<T>(_pipeName);
+            dummyClient.Start();
+            dummyClient.WaitForConnection(TimeSpan.FromSeconds(2));
+            dummyClient.Stop();
+            dummyClient.WaitForDisconnection(TimeSpan.FromSeconds(2));
         }
 
         #region Private methods
 
         private void ListenSync()
         {
-            //
-            while (true)
+            _isRunning = true;
+            while (_shouldKeepRunning)
             {
                 WaitForConnection(_pipeName);
             }
+            _isRunning = false;
         }
 
         private void WaitForConnection(string pipeName)
@@ -122,7 +144,11 @@ namespace NamedPipeWrapper
                 connection.Disconnected += ClientOnDisconnected;
                 connection.Error += ConnectionOnError;
                 connection.Open();
-                _connections.Add(connection);
+
+                lock (_connections)
+                {
+                    _connections.Add(connection);
+                }
 
                 ClientOnConnected(connection);
             }
@@ -155,7 +181,10 @@ namespace NamedPipeWrapper
             if (connection == null)
                 return;
 
-            _connections.Remove(connection);
+            lock (_connections)
+            {
+                _connections.Remove(connection);
+            }
 
             if (ClientDisconnected != null)
                 ClientDisconnected(connection);
