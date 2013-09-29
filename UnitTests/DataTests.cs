@@ -46,7 +46,6 @@ namespace UnitTests
         [SetUp]
         public void SetUp()
         {
-
             Logger.Debug("Setting up test...");
 
             _barrier.Reset();
