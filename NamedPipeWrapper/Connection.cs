@@ -137,7 +137,7 @@ namespace NamedPipeWrapper
         /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
         private void ReadPipe()
         {
-            while (_streamWrapper.IsConnected && _streamWrapper.CanRead)
+            while (IsConnected && _streamWrapper.CanRead)
             {
                 var obj = _streamWrapper.ReadObject();
                 if (obj == null)
@@ -156,7 +156,7 @@ namespace NamedPipeWrapper
         /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
         private void WritePipe()
         {
-            while (_streamWrapper.IsConnected && _streamWrapper.CanWrite)
+            while (IsConnected && _streamWrapper.CanWrite)
             {
                 _writeSignal.WaitOne();
                 while (_writeQueue.Count > 0)
