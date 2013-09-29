@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace NamedPipeWrapper.IO
@@ -54,11 +55,13 @@ namespace NamedPipeWrapper.IO
             _writer = new PipeStreamWriter<T>(BaseStream);
         }
 
+        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
         public T ReadObject()
         {
             return _reader.ReadObject();
         }
 
+        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
         public void WriteObject(T obj)
         {
             _writer.WriteObject(obj);

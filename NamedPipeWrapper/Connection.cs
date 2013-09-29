@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO.Pipes;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
 using NamedPipeWrapper.IO;
@@ -95,6 +96,7 @@ namespace NamedPipeWrapper
         /// <summary>
         ///     Invoked on the background thread.
         /// </summary>
+        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
         private void ReadPipe()
         {
             while (_streamWrapper.IsConnected && _streamWrapper.CanRead)
@@ -113,6 +115,7 @@ namespace NamedPipeWrapper
         /// <summary>
         ///     Invoked on the background thread.
         /// </summary>
+        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
         private void WritePipe()
         {
             while (_streamWrapper.IsConnected && _streamWrapper.CanWrite)

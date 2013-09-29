@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Pipes;
 using System.Linq;
 using System.Net;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace NamedPipeWrapper.IO
@@ -21,6 +22,7 @@ namespace NamedPipeWrapper.IO
 
         #region Private stream writers
 
+        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
         private byte[] Serialize(T obj)
         {
             using (var memoryStream = new MemoryStream())
@@ -48,6 +50,7 @@ namespace NamedPipeWrapper.IO
 
         #endregion
 
+        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
         public void WriteObject(T obj)
         {
             var data = Serialize(obj);

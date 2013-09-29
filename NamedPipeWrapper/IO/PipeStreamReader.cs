@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Pipes;
 using System.Linq;
 using System.Net;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace NamedPipeWrapper.IO
@@ -44,6 +45,7 @@ namespace NamedPipeWrapper.IO
             return IPAddress.NetworkToHostOrder(BitConverter.ToInt32(lenbuf, 0));
         }
 
+        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
         private T ReadObject(int len)
         {
             var data = new byte[len];
@@ -56,6 +58,7 @@ namespace NamedPipeWrapper.IO
 
         #endregion
 
+        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
         public T ReadObject()
         {
             var len = ReadLength();
