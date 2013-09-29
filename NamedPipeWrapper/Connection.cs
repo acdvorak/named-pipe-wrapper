@@ -32,14 +32,14 @@ namespace NamedPipeWrapper
         public bool IsConnected { get { return _streamWrapper.IsConnected; } }
 
         /// <summary>
-        /// Invoked whenever a message is received from the other end of the pipe.
-        /// </summary>
-        public event ConnectionMessageEventHandler<T> ReceiveMessage;
-
-        /// <summary>
         /// Invoked when the named pipe connection terminates.
         /// </summary>
         public event ConnectionEventHandler<T> Disconnected;
+
+        /// <summary>
+        /// Invoked whenever a message is received from the other end of the pipe.
+        /// </summary>
+        public event ConnectionMessageEventHandler<T> ReceiveMessage;
 
         /// <summary>
         /// Invoked when an exception is thrown during any read/write operation over the named pipe.
