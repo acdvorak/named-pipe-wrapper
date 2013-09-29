@@ -246,6 +246,34 @@ namespace UnitTests
             Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
         }
 
+        [Test]
+        public void TestMessageSize300Mx3()
+        {
+            const int numBytes = 1024 * 1024 * 300 + 1;
+
+            SendMessageToServer(numBytes);
+            _barrier.WaitOne(TimeSpan.FromSeconds(20));
+            Assert.NotNull(_actualHash, string.Format("Server should have received client's {0} byte message", numBytes));
+            Assert.AreEqual(_expectedHash, _actualHash, string.Format("SHA-1 hashes for {0} byte message should match", numBytes));
+            Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
+            _barrier.Reset();
+            Logger.Debug("...");
+
+            SendMessageToServer(numBytes);
+            _barrier.WaitOne(TimeSpan.FromSeconds(20));
+            Assert.NotNull(_actualHash, string.Format("Server should have received client's {0} byte message", numBytes));
+            Assert.AreEqual(_expectedHash, _actualHash, string.Format("SHA-1 hashes for {0} byte message should match", numBytes));
+            Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
+            _barrier.Reset();
+            Logger.Debug("...");
+
+            SendMessageToServer(numBytes);
+            _barrier.WaitOne(TimeSpan.FromSeconds(20));
+            Assert.NotNull(_actualHash, string.Format("Server should have received client's {0} byte message", numBytes));
+            Assert.AreEqual(_expectedHash, _actualHash, string.Format("SHA-1 hashes for {0} byte message should match", numBytes));
+            Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
+        }
+
         #endregion
 
         #region Helper methods
