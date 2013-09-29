@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("NamedPipeWrapperTest")]
+[assembly: AssemblyTitle("ExampleGUI")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("NamedPipeWrapper")]
+[assembly: AssemblyProduct("ExampleGUI")]
 [assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("043126e9-08e0-4c70-ab5f-fdb611fe0a6b")]
+[assembly: Guid("d187744e-0432-4f8d-9c33-5ef3e20146a1")]
 
 // Version information for an assembly consists of the following four values:
 //

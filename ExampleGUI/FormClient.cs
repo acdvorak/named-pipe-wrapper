@@ -8,7 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using NamedPipeWrapper;
 
-namespace NamedPipeWrapperTest
+namespace ExampleGUI
 {
     public partial class FormClient : Form
     {

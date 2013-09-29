@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace NamedPipeWrapperTest
+namespace ExampleGUI
 {
     static class Constants
     {
-        public const string PIPE_NAME = "bdhero_test_pipe";
+        public const string PIPE_NAME = "named_pipe_test_server";
     }
 }

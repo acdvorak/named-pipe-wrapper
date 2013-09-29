@@ -1,4 +1,4 @@
-﻿namespace NamedPipeWrapperTest
+﻿namespace ExampleGUI
 {
     partial class FormClient
     {

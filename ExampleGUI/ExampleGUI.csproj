@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{A93979B2-DAD1-4C55-ACCE-DF8B6EDCD3D5}</ProjectGuid>
+    <ProjectGuid>{199E5EF6-D1FA-4662-BDD4-1D49A747AFF9}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NamedPipeWrapperTest</RootNamespace>
-    <AssemblyName>NamedPipeWrapperTest</AssemblyName>
+    <RootNamespace>ExampleGUI</RootNamespace>
+    <AssemblyName>ExampleGUI</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -93,7 +93,6 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
