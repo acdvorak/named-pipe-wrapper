@@ -16,6 +16,13 @@ namespace NamedPipeWrapper
     public class Client<T> where T : class
     {
         /// <summary>
+        /// Gets or sets whether the client should attempt to reconnect when the pipe breaks
+        /// due to an error or the other end terminates the connection.
+        /// Default value is <c>true</c>.
+        /// </summary>
+        public bool AutoReconnect { get; set; }
+
+        /// <summary>
         /// Invoked whenever a message is received from the server.
         /// </summary>
         public event ConnectionMessageEventHandler<T> ServerMessage;
@@ -36,6 +43,8 @@ namespace NamedPipeWrapper
         private readonly AutoResetEvent _connected = new AutoResetEvent(false);
         private readonly AutoResetEvent _disconnected = new AutoResetEvent(false);
 
+        private volatile bool _closedExplicitly;
+
         /// <summary>
         /// Constructs a new <c>Client</c> to connect to the <see cref="Server{T}"/> specified by <paramref name="pipeName"/>.
         /// </summary>
@@ -43,6 +52,7 @@ namespace NamedPipeWrapper
         public Client(string pipeName)
         {
             _pipeName = pipeName;
+            AutoReconnect = true;
         }
 
         /// <summary>
@@ -51,6 +61,7 @@ namespace NamedPipeWrapper
         /// </summary>
         public void Start()
         {
+            _closedExplicitly = false;
             var worker = new Worker();
             worker.Error += OnError;
             worker.DoWork(ListenSync);
@@ -71,6 +82,7 @@ namespace NamedPipeWrapper
         /// </summary>
         public void Stop()
         {
+            _closedExplicitly = true;
             if (_connection != null)
                 _connection.Close();
         }
@@ -135,7 +147,12 @@ namespace NamedPipeWrapper
         {
             if (Disconnected != null)
                 Disconnected(connection);
+
             _disconnected.Set();
+
+            // Reconnect
+            if (AutoReconnect && !_closedExplicitly)
+                Start();
         }
 
         private void OnReceiveMessage(Connection<T> connection, T message)
