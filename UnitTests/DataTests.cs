@@ -62,6 +62,9 @@ namespace UnitTests
             _server.ClientDisconnected += ServerOnClientDisconnected;
             _server.ClientMessage += ServerOnClientMessage;
 
+            _server.Error += ServerOnError;
+            _client.Error += ClientOnError;
+
             _server.Start();
             _client.Start();
 
@@ -72,6 +75,16 @@ namespace UnitTests
             Logger.Debug("---");
 
             _startTime = DateTime.Now;
+        }
+
+        private void ServerOnError(Exception exception)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void ClientOnError(Exception exception)
+        {
+            throw new NotImplementedException();
         }
 
         [TearDown]
@@ -85,6 +98,9 @@ namespace UnitTests
 
             _server.ClientDisconnected -= ServerOnClientDisconnected;
             _server.ClientMessage -= ServerOnClientMessage;
+
+            _server.Error -= ServerOnError;
+            _client.Error -= ClientOnError;
 
             Logger.Debug("Client and server stopped");
             Logger.DebugFormat("Test took {0}", (DateTime.Now - _startTime));
