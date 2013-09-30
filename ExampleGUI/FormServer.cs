@@ -34,6 +34,7 @@ namespace ExampleGUI
             _clients.Add(connection.Name);
             AddLine("<b>" + connection.Name + "</b> connected!");
             UpdateClientList();
+            connection.PushMessage("Welcome!  You are now connected to the server.");
         }
 
         private void OnClientDisconnected(Connection<string> connection)
