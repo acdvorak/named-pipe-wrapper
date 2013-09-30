@@ -11,8 +11,27 @@ namespace NamedPipeWrapper.IO
     /// <summary>
     /// Wraps a <see cref="PipeStream"/> object to read and write .NET CLR objects.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class PipeStreamWrapper<T> where T : class
+    /// <typeparam name="TReadWrite">Reference type to read from and write to the pipe</typeparam>
+    public class PipeStreamWrapper<TReadWrite> : PipeStreamWrapper<TReadWrite, TReadWrite>
+        where TReadWrite : class
+    {
+        /// <summary>
+        /// Constructs a new <c>PipeStreamWrapper</c> object that reads from and writes to the given <paramref name="stream"/>.
+        /// </summary>
+        /// <param name="stream">Stream to read from and write to</param>
+        public PipeStreamWrapper(PipeStream stream) : base(stream)
+        {
+        }
+    }
+
+    /// <summary>
+    /// Wraps a <see cref="PipeStream"/> object to read and write .NET CLR objects.
+    /// </summary>
+    /// <typeparam name="TRead">Reference type to <b>read</b> from the pipe</typeparam>
+    /// <typeparam name="TWrite">Reference type to <b>write</b> to the pipe</typeparam>
+    public class PipeStreamWrapper<TRead, TWrite>
+        where TRead : class
+        where TWrite : class
     {
         /// <summary>
         /// Gets the underlying <c>PipeStream</c> object.
@@ -52,8 +71,8 @@ namespace NamedPipeWrapper.IO
             get { return BaseStream.CanWrite; }
         }
 
-        private readonly PipeStreamReader<T> _reader;
-        private readonly PipeStreamWriter<T> _writer;
+        private readonly PipeStreamReader<TRead> _reader;
+        private readonly PipeStreamWriter<TWrite> _writer;
 
         /// <summary>
         /// Constructs a new <c>PipeStreamWrapper</c> object that reads from and writes to the given <paramref name="stream"/>.
@@ -62,8 +81,8 @@ namespace NamedPipeWrapper.IO
         public PipeStreamWrapper(PipeStream stream)
         {
             BaseStream = stream;
-            _reader = new PipeStreamReader<T>(BaseStream);
-            _writer = new PipeStreamWriter<T>(BaseStream);
+            _reader = new PipeStreamReader<TRead>(BaseStream);
+            _writer = new PipeStreamWriter<TWrite>(BaseStream);
         }
 
         /// <summary>
@@ -71,8 +90,8 @@ namespace NamedPipeWrapper.IO
         /// or the pipe is disconnected.
         /// </summary>
         /// <returns>The next object read from the pipe, or <c>null</c> if the pipe disconnected.</returns>
-        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
-        public T ReadObject()
+        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="TRead"/> is not marked as serializable.</exception>
+        public TRead ReadObject()
         {
             return _reader.ReadObject();
         }
@@ -81,8 +100,8 @@ namespace NamedPipeWrapper.IO
         /// Writes an object to the pipe.  This method blocks until all data is sent.
         /// </summary>
         /// <param name="obj">Object to write to the pipe</param>
-        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
-        public void WriteObject(T obj)
+        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="TRead"/> is not marked as serializable.</exception>
+        public void WriteObject(TWrite obj)
         {
             _writer.WriteObject(obj);
         }

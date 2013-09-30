@@ -32,7 +32,7 @@ namespace ExampleCLI
             client.Stop();
         }
 
-        private void OnServerMessage(Connection<MyMessage> connection, MyMessage message)
+        private void OnServerMessage(Connection<MyMessage, MyMessage> connection, MyMessage message)
         {
             Console.WriteLine("Server says: {0}", message);
         }

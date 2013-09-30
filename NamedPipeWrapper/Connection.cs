@@ -13,8 +13,11 @@ namespace NamedPipeWrapper
     /// <summary>
     /// Represents a connection between a named pipe client and server.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class Connection<T> where T : class
+    /// <typeparam name="TRead">Reference type to read from the named pipe</typeparam>
+    /// <typeparam name="TWrite">Reference type to write to the named pipe</typeparam>
+    public class Connection<TRead, TWrite>
+        where TRead : class
+        where TWrite : class
     {
         /// <summary>
         /// Gets the connection's unique identifier.
@@ -34,22 +37,22 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Invoked when the named pipe connection terminates.
         /// </summary>
-        public event ConnectionEventHandler<T> Disconnected;
+        public event ConnectionEventHandler<TRead, TWrite> Disconnected;
 
         /// <summary>
         /// Invoked whenever a message is received from the other end of the pipe.
         /// </summary>
-        public event ConnectionMessageEventHandler<T> ReceiveMessage;
+        public event ConnectionMessageEventHandler<TRead, TWrite> ReceiveMessage;
 
         /// <summary>
         /// Invoked when an exception is thrown during any read/write operation over the named pipe.
         /// </summary>
-        public event ConnectionExceptionEventHandler<T> Error;
+        public event ConnectionExceptionEventHandler<TRead, TWrite> Error;
 
-        private readonly PipeStreamWrapper<T> _streamWrapper;
+        private readonly PipeStreamWrapper<TRead, TWrite> _streamWrapper;
 
         private readonly AutoResetEvent _writeSignal = new AutoResetEvent(false);
-        private readonly Queue<T> _writeQueue = new Queue<T>();
+        private readonly Queue<TWrite> _writeQueue = new Queue<TWrite>();
 
         private bool _notifiedSucceeded;
 
@@ -57,7 +60,7 @@ namespace NamedPipeWrapper
         {
             Id = id;
             Name = name;
-            _streamWrapper = new PipeStreamWrapper<T>(serverStream);
+            _streamWrapper = new PipeStreamWrapper<TRead, TWrite>(serverStream);
         }
 
         /// <summary>
@@ -83,7 +86,7 @@ namespace NamedPipeWrapper
         /// at the next available opportunity.
         /// </summary>
         /// <param name="message"></param>
-        public void PushMessage(T message)
+        public void PushMessage(TWrite message)
         {
             _writeQueue.Enqueue(message);
             _writeSignal.Set();
@@ -134,7 +137,7 @@ namespace NamedPipeWrapper
         /// <summary>
         ///     Invoked on the background thread.
         /// </summary>
-        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
+        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="TRead"/> is not marked as serializable.</exception>
         private void ReadPipe()
         {
             while (IsConnected && _streamWrapper.CanRead)
@@ -153,7 +156,7 @@ namespace NamedPipeWrapper
         /// <summary>
         ///     Invoked on the background thread.
         /// </summary>
-        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
+        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="TWrite"/> is not marked as serializable.</exception>
         private void WritePipe()
         {
             while (IsConnected && _streamWrapper.CanWrite)
@@ -172,9 +175,11 @@ namespace NamedPipeWrapper
     {
         private static int _lastId;
 
-        public static Connection<T> CreateConnection<T>(PipeStream pipeStream) where T : class
+        public static Connection<TRead, TWrite> CreateConnection<TRead, TWrite>(PipeStream pipeStream)
+            where TRead : class
+            where TWrite : class
         {
-            return new Connection<T>(++_lastId, "Client " + _lastId, pipeStream);
+            return new Connection<TRead, TWrite>(++_lastId, "Client " + _lastId, pipeStream);
         }
     }
 
@@ -182,22 +187,31 @@ namespace NamedPipeWrapper
     /// Handles new connections.
     /// </summary>
     /// <param name="connection">The newly established connection</param>
-    /// <typeparam name="T">Reference type</typeparam>
-    public delegate void ConnectionEventHandler<T>(Connection<T> connection) where T : class;
+    /// <typeparam name="TRead">Reference type</typeparam>
+    /// <typeparam name="TWrite">Reference type</typeparam>
+    public delegate void ConnectionEventHandler<TRead, TWrite>(Connection<TRead, TWrite> connection)
+        where TRead : class
+        where TWrite : class;
 
     /// <summary>
     /// Handles messages received from a named pipe.
     /// </summary>
-    /// <typeparam name="T">Reference type</typeparam>
+    /// <typeparam name="TRead">Reference type</typeparam>
+    /// <typeparam name="TWrite">Reference type</typeparam>
     /// <param name="connection">Connection that received the message</param>
     /// <param name="message">Message sent by the other end of the pipe</param>
-    public delegate void ConnectionMessageEventHandler<T>(Connection<T> connection, T message) where T : class;
+    public delegate void ConnectionMessageEventHandler<TRead, TWrite>(Connection<TRead, TWrite> connection, TRead message)
+        where TRead : class
+        where TWrite : class;
 
     /// <summary>
     /// Handles exceptions thrown during read/write operations.
     /// </summary>
-    /// <typeparam name="T">Reference type</typeparam>
+    /// <typeparam name="TRead">Reference type</typeparam>
+    /// <typeparam name="TWrite">Reference type</typeparam>
     /// <param name="connection">Connection that threw the exception</param>
     /// <param name="exception">The exception that was thrown</param>
-    public delegate void ConnectionExceptionEventHandler<T>(Connection<T> connection, Exception exception) where T : class;
+    public delegate void ConnectionExceptionEventHandler<TRead, TWrite>(Connection<TRead, TWrite> connection, Exception exception)
+        where TRead : class
+        where TWrite : class;
 }

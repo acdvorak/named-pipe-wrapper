@@ -31,7 +31,7 @@ namespace ExampleCLI
             server.Stop();
         }
 
-        private void OnClientConnected(Connection<MyMessage> connection)
+        private void OnClientConnected(Connection<MyMessage, MyMessage> connection)
         {
             Console.WriteLine("Client {0} is now connected!", connection.Id);
             connection.PushMessage(new MyMessage
@@ -41,12 +41,12 @@ namespace ExampleCLI
                 });
         }
 
-        private void OnClientDisconnected(Connection<MyMessage> connection)
+        private void OnClientDisconnected(Connection<MyMessage, MyMessage> connection)
         {
             Console.WriteLine("Client {0} disconnected", connection.Id);
         }
 
-        private void OnClientMessage(Connection<MyMessage> connection, MyMessage message)
+        private void OnClientMessage(Connection<MyMessage, MyMessage> connection, MyMessage message)
         {
             Console.WriteLine("Client {0} says: {1}", connection.Id, message);
         }
