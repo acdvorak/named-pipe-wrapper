@@ -23,6 +23,7 @@ namespace ExampleGUI
         private void OnLoad(object sender, EventArgs eventArgs)
         {
             _client.ServerMessage += OnServerMessage;
+            _client.Disconnected += OnDisconnected;
             _client.Start();
         }
 
@@ -31,6 +32,14 @@ namespace ExampleGUI
             richTextBoxMessages.Invoke(new Action(delegate
                 {
                     AddLine("<b>Server</b>: " + message);
+                }));
+        }
+
+        private void OnDisconnected(Connection<string> connection)
+        {
+            richTextBoxMessages.Invoke(new Action(delegate
+                {
+                    AddLine("<b>Disconnected from server</b>");
                 }));
         }
 
