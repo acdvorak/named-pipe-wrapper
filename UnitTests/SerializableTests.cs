@@ -123,7 +123,7 @@ namespace UnitTests
             _expectedData = new TestCollection();
             for (var i = 0; i < 10; i++)
             {
-                var item = new TestItem(i, _expectedData);
+                var item = new TestItem(i, _expectedData, RandomEnum());
                 _expectedData.Add(item);
             }
             _expectedHash = _expectedData.GetHashCode();
@@ -145,6 +145,16 @@ namespace UnitTests
                 Assert.AreEqual(expectedItem, actualItem, string.Format("Items at index {0} should be equal", i));
                 Assert.AreEqual(actualItem.Parent, _actualData, string.Format("Item at index {0}'s Parent property should reference the item's parent collection", i));
             }
+        }
+
+        private TestEnum RandomEnum()
+        {
+            var rand = new Random().NextDouble();
+            if (rand < 0.33)
+                return TestEnum.A;
+            if (rand < 0.66)
+                return TestEnum.B;
+            return TestEnum.C;
         }
 
         #endregion
@@ -189,16 +199,18 @@ namespace UnitTests
     {
         public readonly int Id;
         public readonly TestCollection Parent;
+        public readonly TestEnum Enum;
 
-        public TestItem(int id, TestCollection parent)
+        public TestItem(int id, TestCollection parent, TestEnum @enum)
         {
             Id = id;
             Parent = parent;
+            Enum = @enum;
         }
 
         protected bool Equals(TestItem other)
         {
-            return Id == other.Id;
+            return Id == other.Id && Enum == other.Enum;
         }
 
         public override bool Equals(object obj)
@@ -211,7 +223,17 @@ namespace UnitTests
 
         public override int GetHashCode()
         {
-            return Id;
+            unchecked
+            {
+                return (Id*397) ^ (int) Enum;
+            }
         }
+    }
+
+    enum TestEnum
+    {
+        A = 1,
+        B = 2,
+        C = 3,
     }
 }
