@@ -111,14 +111,14 @@ namespace UnitTests
 
         #region Events
 
-        private void ServerOnClientDisconnected(Connection<byte[]> connection)
+        private void ServerOnClientDisconnected(Connection<byte[], byte[]> connection)
         {
             Logger.Warn("Client disconnected");
             _clientDisconnected = true;
             _barrier.Set();
         }
 
-        private void ServerOnClientMessage(Connection<byte[]> connection, byte[] message)
+        private void ServerOnClientMessage(Connection<byte[], byte[]> connection, byte[] message)
         {
             Logger.DebugFormat("Received {0} bytes from the client", message.Length);
             _actualData = message;

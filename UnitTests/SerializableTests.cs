@@ -105,7 +105,7 @@ namespace UnitTests
 
         #region Events
 
-        private void ServerOnClientMessage(Connection<TestCollection> connection, TestCollection message)
+        private void ServerOnClientMessage(Connection<TestCollection, TestCollection> connection, TestCollection message)
         {
             Logger.DebugFormat("Received collection with {0} items from the client", message.Count);
             _actualData = message;

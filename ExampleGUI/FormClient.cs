@@ -27,7 +27,7 @@ namespace ExampleGUI
             _client.Start();
         }
 
-        private void OnServerMessage(Connection<string> connection, string message)
+        private void OnServerMessage(Connection<string, string> connection, string message)
         {
             richTextBoxMessages.Invoke(new Action(delegate
                 {

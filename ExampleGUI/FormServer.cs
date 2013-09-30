@@ -29,7 +29,7 @@ namespace ExampleGUI
             _server.Start();
         }
 
-        private void OnClientConnected(Connection<string> connection)
+        private void OnClientConnected(Connection<string, string> connection)
         {
             _clients.Add(connection.Name);
             AddLine("<b>" + connection.Name + "</b> connected!");
@@ -37,7 +37,7 @@ namespace ExampleGUI
             connection.PushMessage("Welcome!  You are now connected to the server.");
         }
 
-        private void OnClientDisconnected(Connection<string> connection)
+        private void OnClientDisconnected(Connection<string, string> connection)
         {
             _clients.Remove(connection.Name);
             AddLine("<b>" + connection.Name + "</b> disconnected!");
