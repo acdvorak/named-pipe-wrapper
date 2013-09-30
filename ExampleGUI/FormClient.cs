@@ -35,7 +35,7 @@ namespace ExampleGUI
                 }));
         }
 
-        private void OnDisconnected(Connection<string> connection)
+        private void OnDisconnected(Connection<string, string> connection)
         {
             richTextBoxMessages.Invoke(new Action(delegate
                 {
