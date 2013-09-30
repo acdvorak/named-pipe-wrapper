@@ -17,7 +17,7 @@ namespace NamedPipeWrapper
     {
         /// <summary>
         /// Gets or sets whether the client should attempt to reconnect when the pipe breaks
-        /// due to an error or the other end terminates the connection.
+        /// due to an error or the other end terminating the connection.
         /// Default value is <c>true</c>.
         /// </summary>
         public bool AutoReconnect { get; set; }
