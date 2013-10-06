@@ -15,7 +15,7 @@ namespace NamedPipeWrapper
     /// </summary>
     /// <typeparam name="TRead">Reference type to read from the named pipe</typeparam>
     /// <typeparam name="TWrite">Reference type to write to the named pipe</typeparam>
-    public class Connection<TRead, TWrite>
+    public class NamedPipeConnection<TRead, TWrite>
         where TRead : class
         where TWrite : class
     {
@@ -56,7 +56,7 @@ namespace NamedPipeWrapper
 
         private bool _notifiedSucceeded;
 
-        internal Connection(int id, string name, PipeStream serverStream)
+        internal NamedPipeConnection(int id, string name, PipeStream serverStream)
         {
             Id = id;
             Name = name;
@@ -175,11 +175,11 @@ namespace NamedPipeWrapper
     {
         private static int _lastId;
 
-        public static Connection<TRead, TWrite> CreateConnection<TRead, TWrite>(PipeStream pipeStream)
+        public static NamedPipeConnection<TRead, TWrite> CreateConnection<TRead, TWrite>(PipeStream pipeStream)
             where TRead : class
             where TWrite : class
         {
-            return new Connection<TRead, TWrite>(++_lastId, "Client " + _lastId, pipeStream);
+            return new NamedPipeConnection<TRead, TWrite>(++_lastId, "Client " + _lastId, pipeStream);
         }
     }
 
@@ -189,7 +189,7 @@ namespace NamedPipeWrapper
     /// <param name="connection">The newly established connection</param>
     /// <typeparam name="TRead">Reference type</typeparam>
     /// <typeparam name="TWrite">Reference type</typeparam>
-    public delegate void ConnectionEventHandler<TRead, TWrite>(Connection<TRead, TWrite> connection)
+    public delegate void ConnectionEventHandler<TRead, TWrite>(NamedPipeConnection<TRead, TWrite> connection)
         where TRead : class
         where TWrite : class;
 
@@ -200,7 +200,7 @@ namespace NamedPipeWrapper
     /// <typeparam name="TWrite">Reference type</typeparam>
     /// <param name="connection">Connection that received the message</param>
     /// <param name="message">Message sent by the other end of the pipe</param>
-    public delegate void ConnectionMessageEventHandler<TRead, TWrite>(Connection<TRead, TWrite> connection, TRead message)
+    public delegate void ConnectionMessageEventHandler<TRead, TWrite>(NamedPipeConnection<TRead, TWrite> connection, TRead message)
         where TRead : class
         where TWrite : class;
 
@@ -211,7 +211,7 @@ namespace NamedPipeWrapper
     /// <typeparam name="TWrite">Reference type</typeparam>
     /// <param name="connection">Connection that threw the exception</param>
     /// <param name="exception">The exception that was thrown</param>
-    public delegate void ConnectionExceptionEventHandler<TRead, TWrite>(Connection<TRead, TWrite> connection, Exception exception)
+    public delegate void ConnectionExceptionEventHandler<TRead, TWrite>(NamedPipeConnection<TRead, TWrite> connection, Exception exception)
         where TRead : class
         where TWrite : class;
 }

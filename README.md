@@ -18,15 +18,15 @@ Requires .NET 4.0 full.
 Server:
 
 ```csharp
-var server = new Server<SomeClass>("MyServerPipe");
+var server = new NamedPipeServer<SomeClass>("MyServerPipe");
 
-server.ClientConnected += delegate(Connection<SomeClass> conn)
+server.ClientConnected += delegate(NamedPipeConnection<SomeClass> conn)
     {
         Console.WriteLine("Client {0} is now connected!", conn.Id);
         conn.PushMessage(new SomeClass { Text: "Welcome!" });
     };
 
-server.ClientMessage += delegate(Connection<SomeClass> conn, SomeClass message)
+server.ClientMessage += delegate(NamedPipeConnection<SomeClass> conn, SomeClass message)
     {
         Console.WriteLine("Client {0} says: {1}", conn.Id, message.Text);
     };
@@ -41,9 +41,9 @@ server.Start();
 Client:
 
 ```csharp
-var client = new Client<SomeClass>("MyServerPipe");
+var client = new NamedPipeClient<SomeClass>("MyServerPipe");
 
-client.ServerMessage += delegate(Connection<SomeClass> conn, SomeClass message)
+client.ServerMessage += delegate(NamedPipeConnection<SomeClass> conn, SomeClass message)
     {
         Console.WriteLine("Server says: {0}", message.Text);
     };

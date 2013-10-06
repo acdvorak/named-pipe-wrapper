@@ -12,7 +12,7 @@ namespace ExampleGUI
 {
     public partial class FormServer : Form
     {
-        private readonly Server<string> _server = new Server<string>(Constants.PIPE_NAME);
+        private readonly NamedPipeServer<string> _server = new NamedPipeServer<string>(Constants.PIPE_NAME);
         private readonly ISet<string> _clients = new HashSet<string>();
 
         public FormServer()
@@ -29,7 +29,7 @@ namespace ExampleGUI
             _server.Start();
         }
 
-        private void OnClientConnected(Connection<string, string> connection)
+        private void OnClientConnected(NamedPipeConnection<string, string> connection)
         {
             _clients.Add(connection.Name);
             AddLine("<b>" + connection.Name + "</b> connected!");
@@ -37,7 +37,7 @@ namespace ExampleGUI
             connection.PushMessage("Welcome!  You are now connected to the server.");
         }
 
-        private void OnClientDisconnected(Connection<string, string> connection)
+        private void OnClientDisconnected(NamedPipeConnection<string, string> connection)
         {
             _clients.Remove(connection.Name);
             AddLine("<b>" + connection.Name + "</b> disconnected!");

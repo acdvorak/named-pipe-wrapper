@@ -12,7 +12,7 @@ namespace ExampleGUI
 {
     public partial class FormClient : Form
     {
-        private readonly Client<string> _client = new Client<string>(Constants.PIPE_NAME);
+        private readonly NamedPipeClient<string> _client = new NamedPipeClient<string>(Constants.PIPE_NAME);
 
         public FormClient()
         {
@@ -27,7 +27,7 @@ namespace ExampleGUI
             _client.Start();
         }
 
-        private void OnServerMessage(Connection<string, string> connection, string message)
+        private void OnServerMessage(NamedPipeConnection<string, string> connection, string message)
         {
             richTextBoxMessages.Invoke(new Action(delegate
                 {
@@ -35,7 +35,7 @@ namespace ExampleGUI
                 }));
         }
 
-        private void OnDisconnected(Connection<string, string> connection)
+        private void OnDisconnected(NamedPipeConnection<string, string> connection)
         {
             richTextBoxMessages.Invoke(new Action(delegate
                 {

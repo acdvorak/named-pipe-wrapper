@@ -12,13 +12,13 @@ namespace NamedPipeWrapper
     /// Wraps a <see cref="NamedPipeServerStream"/> and provides multiple simultaneous client connection handling.
     /// </summary>
     /// <typeparam name="TReadWrite">Reference type to read from and write to the named pipe</typeparam>
-    public class Server<TReadWrite> : Server<TReadWrite, TReadWrite> where TReadWrite : class
+    public class NamedPipeServer<TReadWrite> : Server<TReadWrite, TReadWrite> where TReadWrite : class
     {
         /// <summary>
-        /// Constructs a new <c>Server</c> object that listens for client connections on the given <paramref name="pipeName"/>.
+        /// Constructs a new <c>NamedPipeServer</c> object that listens for client connections on the given <paramref name="pipeName"/>.
         /// </summary>
         /// <param name="pipeName">Name of the pipe to listen on</param>
-        public Server(string pipeName) : base(pipeName)
+        public NamedPipeServer(string pipeName) : base(pipeName)
         {
         }
     }
@@ -53,7 +53,7 @@ namespace NamedPipeWrapper
         public event PipeExceptionEventHandler Error;
 
         private readonly string _pipeName;
-        private readonly List<Connection<TRead, TWrite>> _connections = new List<Connection<TRead, TWrite>>();
+        private readonly List<NamedPipeConnection<TRead, TWrite>> _connections = new List<NamedPipeConnection<TRead, TWrite>>();
 
         private int _nextPipeId;
 
@@ -61,7 +61,7 @@ namespace NamedPipeWrapper
         private volatile bool _isRunning;
 
         /// <summary>
-        /// Constructs a new <c>Server</c> object that listens for client connections on the given <paramref name="pipeName"/>.
+        /// Constructs a new <c>NamedPipeServer</c> object that listens for client connections on the given <paramref name="pipeName"/>.
         /// </summary>
         /// <param name="pipeName">Name of the pipe to listen on</param>
         public Server(string pipeName)
@@ -114,7 +114,7 @@ namespace NamedPipeWrapper
 
             // If background thread is still listening for a client to connect,
             // initiate a dummy connection that will allow the thread to exit.
-            var dummyClient = new Client<TRead, TWrite>(_pipeName);
+            var dummyClient = new NamedPipeClient<TRead, TWrite>(_pipeName);
             dummyClient.Start();
             dummyClient.WaitForConnection(TimeSpan.FromSeconds(2));
             dummyClient.Stop();
@@ -137,7 +137,7 @@ namespace NamedPipeWrapper
         {
             NamedPipeServerStream handshakePipe = null;
             NamedPipeServerStream dataPipe = null;
-            Connection<TRead, TWrite> connection = null;
+            NamedPipeConnection<TRead, TWrite> connection = null;
 
             var connectionPipeName = GetNextConnectionPipeName(pipeName);
 
@@ -180,19 +180,19 @@ namespace NamedPipeWrapper
             }
         }
 
-        private void ClientOnConnected(Connection<TRead, TWrite> connection)
+        private void ClientOnConnected(NamedPipeConnection<TRead, TWrite> connection)
         {
             if (ClientConnected != null)
                 ClientConnected(connection);
         }
 
-        private void ClientOnReceiveMessage(Connection<TRead, TWrite> connection, TRead message)
+        private void ClientOnReceiveMessage(NamedPipeConnection<TRead, TWrite> connection, TRead message)
         {
             if (ClientMessage != null)
                 ClientMessage(connection, message);
         }
 
-        private void ClientOnDisconnected(Connection<TRead, TWrite> connection)
+        private void ClientOnDisconnected(NamedPipeConnection<TRead, TWrite> connection)
         {
             if (connection == null)
                 return;
@@ -209,7 +209,7 @@ namespace NamedPipeWrapper
         /// <summary>
         ///     Invoked on the UI thread.
         /// </summary>
-        private void ConnectionOnError(Connection<TRead, TWrite> connection, Exception exception)
+        private void ConnectionOnError(NamedPipeConnection<TRead, TWrite> connection, Exception exception)
         {
             OnError(exception);
         }

@@ -21,7 +21,7 @@ namespace ExampleCLI
 
         public MyClient(string pipeName)
         {
-            var client = new Client<MyMessage>(pipeName);
+            var client = new NamedPipeClient<MyMessage>(pipeName);
             client.ServerMessage += OnServerMessage;
             client.Error += OnError;
             client.Start();
@@ -32,7 +32,7 @@ namespace ExampleCLI
             client.Stop();
         }
 
-        private void OnServerMessage(Connection<MyMessage, MyMessage> connection, MyMessage message)
+        private void OnServerMessage(NamedPipeConnection<MyMessage, MyMessage> connection, MyMessage message)
         {
             Console.WriteLine("Server says: {0}", message);
         }

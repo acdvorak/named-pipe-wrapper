@@ -28,8 +28,8 @@ namespace UnitTests
 
         private const string PipeName = "data_test_pipe";
 
-        private Server<TestCollection> _server;
-        private Client<TestCollection> _client;
+        private NamedPipeServer<TestCollection> _server;
+        private NamedPipeClient<TestCollection> _client;
 
         private TestCollection _expectedData;
         private int _expectedHash;
@@ -53,8 +53,8 @@ namespace UnitTests
             _barrier.Reset();
             _exceptions.Clear();
 
-            _server = new Server<TestCollection>(PipeName);
-            _client = new Client<TestCollection>(PipeName);
+            _server = new NamedPipeServer<TestCollection>(PipeName);
+            _client = new NamedPipeClient<TestCollection>(PipeName);
 
             _expectedData = null;
             _expectedHash = 0;
@@ -105,7 +105,7 @@ namespace UnitTests
 
         #region Events
 
-        private void ServerOnClientMessage(Connection<TestCollection, TestCollection> connection, TestCollection message)
+        private void ServerOnClientMessage(NamedPipeConnection<TestCollection, TestCollection> connection, TestCollection message)
         {
             Logger.DebugFormat("Received collection with {0} items from the client", message.Count);
             _actualData = message;

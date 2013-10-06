@@ -28,8 +28,8 @@ namespace UnitTests
 
         private const string PipeName = "data_test_pipe";
 
-        private Server<byte[]> _server;
-        private Client<byte[]> _client;
+        private NamedPipeServer<byte[]> _server;
+        private NamedPipeClient<byte[]> _client;
 
         private byte[] _expectedData;
         private string _expectedHash;
@@ -50,8 +50,8 @@ namespace UnitTests
 
             _barrier.Reset();
 
-            _server = new Server<byte[]>(PipeName);
-            _client = new Client<byte[]>(PipeName);
+            _server = new NamedPipeServer<byte[]>(PipeName);
+            _client = new NamedPipeClient<byte[]>(PipeName);
 
             _expectedData = null;
             _expectedHash = null;
@@ -111,14 +111,14 @@ namespace UnitTests
 
         #region Events
 
-        private void ServerOnClientDisconnected(Connection<byte[], byte[]> connection)
+        private void ServerOnClientDisconnected(NamedPipeConnection<byte[], byte[]> connection)
         {
             Logger.Warn("Client disconnected");
             _clientDisconnected = true;
             _barrier.Set();
         }
 
-        private void ServerOnClientMessage(Connection<byte[], byte[]> connection, byte[] message)
+        private void ServerOnClientMessage(NamedPipeConnection<byte[], byte[]> connection, byte[] message)
         {
             Logger.DebugFormat("Received {0} bytes from the client", message.Length);
             _actualData = message;

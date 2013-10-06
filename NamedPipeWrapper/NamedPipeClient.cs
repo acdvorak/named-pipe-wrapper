@@ -13,13 +13,13 @@ namespace NamedPipeWrapper
     /// Wraps a <see cref="NamedPipeClientStream"/>.
     /// </summary>
     /// <typeparam name="TReadWrite">Reference type to read from and write to the named pipe</typeparam>
-    public class Client<TReadWrite> : Client<TReadWrite, TReadWrite> where TReadWrite : class
+    public class NamedPipeClient<TReadWrite> : NamedPipeClient<TReadWrite, TReadWrite> where TReadWrite : class
     {
         /// <summary>
-        /// Constructs a new <c>Client</c> to connect to the <see cref="Server{TReadWrite}"/> specified by <paramref name="pipeName"/>.
+        /// Constructs a new <c>NamedPipeClient</c> to connect to the <see cref="NamedPipeNamedPipeServer{TReadWrite}"/> specified by <paramref name="pipeName"/>.
         /// </summary>
         /// <param name="pipeName">Name of the server's pipe</param>
-        public Client(string pipeName) : base(pipeName)
+        public NamedPipeClient(string pipeName) : base(pipeName)
         {
         }
     }
@@ -29,7 +29,7 @@ namespace NamedPipeWrapper
     /// </summary>
     /// <typeparam name="TRead">Reference type to read from the named pipe</typeparam>
     /// <typeparam name="TWrite">Reference type to write to the named pipe</typeparam>
-    public class Client<TRead, TWrite>
+    public class NamedPipeClient<TRead, TWrite>
         where TRead : class
         where TWrite : class
     {
@@ -56,7 +56,7 @@ namespace NamedPipeWrapper
         public event PipeExceptionEventHandler Error;
 
         private readonly string _pipeName;
-        private Connection<TRead, TWrite> _connection;
+        private NamedPipeConnection<TRead, TWrite> _connection;
 
         private readonly AutoResetEvent _connected = new AutoResetEvent(false);
         private readonly AutoResetEvent _disconnected = new AutoResetEvent(false);
@@ -64,10 +64,10 @@ namespace NamedPipeWrapper
         private volatile bool _closedExplicitly;
 
         /// <summary>
-        /// Constructs a new <c>Client</c> to connect to the <see cref="Server{TRead, TWrite}"/> specified by <paramref name="pipeName"/>.
+        /// Constructs a new <c>NamedPipeClient</c> to connect to the <see cref="NamedPipeServer{TRead, TWrite}"/> specified by <paramref name="pipeName"/>.
         /// </summary>
         /// <param name="pipeName">Name of the server's pipe</param>
-        public Client(string pipeName)
+        public NamedPipeClient(string pipeName)
         {
             _pipeName = pipeName;
             AutoReconnect = true;
@@ -143,7 +143,7 @@ namespace NamedPipeWrapper
 
         private void ListenSync()
         {
-            // Get the name of the data pipe that should be used from now on by this Client
+            // Get the name of the data pipe that should be used from now on by this NamedPipeClient
             var handshake = PipeClientFactory.Connect<string, string>(_pipeName);
             var dataPipeName = handshake.ReadObject();
             handshake.Close();
@@ -161,7 +161,7 @@ namespace NamedPipeWrapper
             _connected.Set();
         }
 
-        private void OnDisconnected(Connection<TRead, TWrite> connection)
+        private void OnDisconnected(NamedPipeConnection<TRead, TWrite> connection)
         {
             if (Disconnected != null)
                 Disconnected(connection);
@@ -173,7 +173,7 @@ namespace NamedPipeWrapper
                 Start();
         }
 
-        private void OnReceiveMessage(Connection<TRead, TWrite> connection, TRead message)
+        private void OnReceiveMessage(NamedPipeConnection<TRead, TWrite> connection, TRead message)
         {
             if (ServerMessage != null)
                 ServerMessage(connection, message);
@@ -182,7 +182,7 @@ namespace NamedPipeWrapper
         /// <summary>
         ///     Invoked on the UI thread.
         /// </summary>
-        private void ConnectionOnError(Connection<TRead, TWrite> connection, Exception exception)
+        private void ConnectionOnError(NamedPipeConnection<TRead, TWrite> connection, Exception exception)
         {
             OnError(exception);
         }
