@@ -54,3 +54,7 @@ client.Start();
 
 // ...
 ```
+
+# MIT License
+
+Named Pipe Wrapper for .NET is licensed under the [MIT license](LICENSE.txt).
