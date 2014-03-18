@@ -2,6 +2,10 @@
 
 A simple, easy to use, strongly-typed wrapper around .NET named pipes.
 
+# NuGet Package
+
+Available as a [NuGet package](https://www.nuget.org/packages/NamedPipeWrapper/).
+
 # Features
 
 *  Create named pipe servers that can handle multiple client connections simultaneously.
