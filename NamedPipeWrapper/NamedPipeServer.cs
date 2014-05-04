@@ -96,6 +96,24 @@ namespace NamedPipeWrapper
                 }
             }
         }
+        
+        /// <summary>
+        /// Sends a message to all connected clients asynchronously.
+        /// This method returns immediately, possibly before the message has been sent to all clients.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="TargetCleintName">Send to a Target client</param>
+        public void PushMessage(TWrite message, string TargetCleintName)
+        {
+            if (TargetCleintName == null)
+                throw new ArgumentNullException("TargetCleintName is null");
+
+            var client = _connections.Where(p => p.Name == TargetCleintName).SingleOrDefault();
+            if (client != null)
+                client.PushMessage(message);
+            else
+                throw new Exception("Is Not Exist TargetName");
+        }
 
         /// <summary>
         /// Closes all open client connections and stops listening for new ones.
