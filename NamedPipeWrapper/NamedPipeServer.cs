@@ -98,6 +98,62 @@ namespace NamedPipeWrapper
         }
 
         /// <summary>
+        /// Sends a message to a specific client asynchronously.
+        /// This method returns immediately, possibly before the message has been sent to all clients.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="targetId">Specific client ID to send to.</param>
+        public void PushMessage(TWrite message, int targetId)
+        {
+            lock (_connections)
+            {
+                // Can we speed this up with Linq or does that add overhead?
+                foreach (var client in _connections)
+                {
+                    if (client.Id == targetId)
+                    {
+                        client.PushMessage(message);
+                        break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sends a message to a specific clients asynchronously.
+        /// This method returns immediately, possibly before the message has been sent to all clients.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="targetIds">A list of client ID's to send to.</param>
+        public void PushMessage(TWrite message, List<int> targetIds)
+        {
+            lock (_connections)
+            {
+                // Can we speed this up with Linq or does that add overhead?
+                foreach (var client in _connections)
+                {
+                    if (targetIds.Contains(client.Id))
+                    {
+                        client.PushMessage(message);
+                    }
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Sends a message to a specific clients asynchronously.
+        /// This method returns immediately, possibly before the message has been sent to all clients.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="targetIds">An array of client ID's to send to.</param>
+        public void PushMessage(TWrite message, int[] targetIds)
+        {
+            PushMessage(message,targetIds.ToList());
+        }
+
+
+        /// <summary>
         /// Closes all open client connections and stops listening for new ones.
         /// </summary>
         public void Stop()
