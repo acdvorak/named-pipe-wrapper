@@ -152,6 +152,47 @@ namespace NamedPipeWrapper
             PushMessage(message,targetIds.ToList());
         }
 
+        /// <summary>
+        /// Sends a message to a specific client asynchronously.
+        /// This method returns immediately, possibly before the message has been sent to all clients.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="targetName">Specific client name to send to.</param>
+        public void PushMessage(TWrite message, string targetName)
+        {
+            lock (_connections)
+            {
+                // Can we speed this up with Linq or does that add overhead?
+                foreach (var client in _connections)
+                {
+                    if (client.Name.Equals(targetName))
+                    {
+                        client.PushMessage(message);
+                        break;
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Sends a message to a specific client asynchronously.
+        /// This method returns immediately, possibly before the message has been sent to all clients.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="targetNames">A list of client names to send to.</param>
+        public void PushMessage(TWrite message, List<string> targetNames)
+        {
+            lock (_connections)
+            {
+                foreach (var client in _connections)
+                {
+                    if (targetNames.Contains(client.Name))
+                    {
+                        client.PushMessage(message);
+                    }
+                }
+            }
+        }
+
 
         /// <summary>
         /// Closes all open client connections and stops listening for new ones.
