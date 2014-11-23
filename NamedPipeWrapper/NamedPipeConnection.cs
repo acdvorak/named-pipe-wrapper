@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO.Pipes;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
@@ -28,6 +29,11 @@ namespace NamedPipeWrapper
         /// Gets the connection's name.
         /// </summary>
         public readonly string Name;
+
+        /// <summary>
+        /// Gets the connection's handle.
+        /// </summary>
+        public readonly SafeHandle Handle;
 
         /// <summary>
         /// Gets a value indicating whether the pipe is connected or not.
@@ -60,6 +66,7 @@ namespace NamedPipeWrapper
         {
             Id = id;
             Name = name;
+            Handle = serverStream.SafePipeHandle;
             _streamWrapper = new PipeStreamWrapper<TRead, TWrite>(serverStream);
         }
 
