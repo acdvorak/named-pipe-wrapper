@@ -218,17 +218,14 @@ namespace NamedPipeWrapper
 
         public static NamedPipeClientStream CreateAndConnectPipe(string pipeName)
         {
-            var pipe = CreatePipe(pipeName);
-            // Connect() will attempt to connect once every ms by default regardless of existence.
-            // Let's not make the entire thing melt and ensure we wait on pipe existence.
+            // Save ourselves from calling Connect() every ms.
             string fullPipePath = Path.GetFullPath(String.Format(@"\\.\pipe\{0}", pipeName));
-            while (!File.Exists(fullPipePath))
+            while(!WaitNamedPipe(fullPipePath,1000))
             {
-                Thread.Sleep(250);
+                Thread.Sleep(5); // Don't hammer the CPU while waiting.
             }
-            pipe.Connect();
-
-
+            var pipe = CreatePipe(pipeName);
+            pipe.Connect(5000);
             return pipe;
         }
 
