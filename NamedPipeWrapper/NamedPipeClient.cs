@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Pipes;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using NamedPipeWrapper.IO;
@@ -141,6 +143,8 @@ namespace NamedPipeWrapper
 
         #region Private methods
 
+
+
         private void ListenSync()
         {
             // Get the name of the data pipe that should be used from now on by this NamedPipeClient
@@ -209,10 +213,23 @@ namespace NamedPipeWrapper
             return new PipeStreamWrapper<TRead, TWrite>(CreateAndConnectPipe(pipeName));
         }
 
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern bool WaitNamedPipe(string name, int timeout);
+
         public static NamedPipeClientStream CreateAndConnectPipe(string pipeName)
         {
             var pipe = CreatePipe(pipeName);
+            // Connect() will attempt to connect once every ms by default regardless of existence.
+            // Let's not make the entire thing melt and ensure we wait on pipe existence.
+            string fullPipePath = Path.GetFullPath(String.Format(@"\\.\pipe\{0}", pipeName));
+            while (!File.Exists(fullPipePath))
+            {
+                Thread.Sleep(250);
+            }
+            WaitNamedPipe(fullPipePath, 0xFFFFFFF);
             pipe.Connect();
+
+
             return pipe;
         }
 
