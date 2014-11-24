@@ -226,7 +226,6 @@ namespace NamedPipeWrapper
             {
                 Thread.Sleep(250);
             }
-            WaitNamedPipe(fullPipePath, 0xFFFFFFF);
             pipe.Connect();
 
 
