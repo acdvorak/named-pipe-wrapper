@@ -43,6 +43,14 @@ namespace NamedPipeWrapper
         public bool AutoReconnect { get; set; }
 
         /// <summary>
+        /// Gets or sets how long the client waits between a reconnection attempt.
+        /// Default value is <c>0</c>.
+        /// </summary>
+        public int AutoReconnectDelay { get; set; }
+
+
+
+        /// <summary>
         /// Invoked whenever a message is received from the server.
         /// </summary>
         public event ConnectionMessageEventHandler<TRead, TWrite> ServerMessage;
@@ -174,7 +182,10 @@ namespace NamedPipeWrapper
 
             // Reconnect
             if (AutoReconnect && !_closedExplicitly)
+            {
+                Thread.Sleep(AutoReconnectDelay);
                 Start();
+            }
         }
 
         private void OnReceiveMessage(NamedPipeConnection<TRead, TWrite> connection, TRead message)
