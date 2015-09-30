@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Pipes;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using NamedPipeWrapper.IO;
@@ -41,6 +43,14 @@ namespace NamedPipeWrapper
         public bool AutoReconnect { get; set; }
 
         /// <summary>
+        /// Gets or sets how long the client waits between a reconnection attempt.
+        /// Default value is <c>0</c>.
+        /// </summary>
+        public int AutoReconnectDelay { get; set; }
+
+
+
+        /// <summary>
         /// Invoked whenever a message is received from the server.
         /// </summary>
         public event ConnectionMessageEventHandler<TRead, TWrite> ServerMessage;
@@ -77,7 +87,7 @@ namespace NamedPipeWrapper
         /// Connects to the named pipe server asynchronously.
         /// This method returns immediately, possibly before the connection has been established.
         /// </summary>
-        public void Start()
+        public void Start(bool waitForconnection = false)
         {
             _closedExplicitly = false;
             var worker = new Worker();
@@ -141,6 +151,8 @@ namespace NamedPipeWrapper
 
         #region Private methods
 
+
+
         private void ListenSync()
         {
             // Get the name of the data pipe that should be used from now on by this NamedPipeClient
@@ -170,7 +182,10 @@ namespace NamedPipeWrapper
 
             // Reconnect
             if (AutoReconnect && !_closedExplicitly)
+            {
+                Thread.Sleep(AutoReconnectDelay);
                 Start();
+            }
         }
 
         private void OnReceiveMessage(NamedPipeConnection<TRead, TWrite> connection, TRead message)
@@ -202,6 +217,31 @@ namespace NamedPipeWrapper
 
     static class PipeClientFactory
     {
+        [return: MarshalAs(UnmanagedType.Bool)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern bool WaitNamedPipe(string name, int timeout);
+        
+        public static bool NamedPipeExists(string pipeName)
+        {
+            try
+            {
+                bool exists = WaitNamedPipe(pipeName, -1);
+                if (!exists)
+                {
+                    int error = Marshal.GetLastWin32Error();
+                    if (error == 0 || error == 2)
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
         public static PipeStreamWrapper<TRead, TWrite> Connect<TRead, TWrite>(string pipeName)
             where TRead : class
             where TWrite : class
@@ -209,10 +249,15 @@ namespace NamedPipeWrapper
             return new PipeStreamWrapper<TRead, TWrite>(CreateAndConnectPipe(pipeName));
         }
 
-        public static NamedPipeClientStream CreateAndConnectPipe(string pipeName)
+        public static NamedPipeClientStream CreateAndConnectPipe(string pipeName, int timeout = 10)
         {
+            string normalizedPath = Path.GetFullPath(string.Format(@"\\.\pipe\{0}", pipeName));
+            while (!NamedPipeExists(normalizedPath))
+            {
+                Thread.Sleep(timeout);
+            }
             var pipe = CreatePipe(pipeName);
-            pipe.Connect();
+            pipe.Connect(1000);
             return pipe;
         }
 
