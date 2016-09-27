@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using NamedPipeWrapper.IO;
 using NamedPipeWrapper.Threading;
+using System.Collections.Concurrent;
 
 namespace NamedPipeWrapper
 {
@@ -27,7 +28,7 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Gets the connection's name.
         /// </summary>
-        public readonly string Name;
+        public string Name { get; }
 
         /// <summary>
         /// Gets a value indicating whether the pipe is connected or not.
@@ -52,7 +53,10 @@ namespace NamedPipeWrapper
         private readonly PipeStreamWrapper<TRead, TWrite> _streamWrapper;
 
         private readonly AutoResetEvent _writeSignal = new AutoResetEvent(false);
-        private readonly Queue<TWrite> _writeQueue = new Queue<TWrite>();
+        /// <summary>
+        /// To support Multithread, we should use BlockingCollection.
+        /// </summary>
+        private readonly BlockingCollection<TWrite> _writeQueue = new BlockingCollection<TWrite>();
 
         private bool _notifiedSucceeded;
 
@@ -88,7 +92,7 @@ namespace NamedPipeWrapper
         /// <param name="message"></param>
         public void PushMessage(TWrite message)
         {
-            _writeQueue.Enqueue(message);
+            _writeQueue.Add(message);
             _writeSignal.Set();
         }
 
@@ -140,17 +144,26 @@ namespace NamedPipeWrapper
         /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="TRead"/> is not marked as serializable.</exception>
         private void ReadPipe()
         {
+
             while (IsConnected && _streamWrapper.CanRead)
             {
-                var obj = _streamWrapper.ReadObject();
-                if (obj == null)
+                try
                 {
-                    CloseImpl();
-                    return;
+                    var obj = _streamWrapper.ReadObject();
+                    if (obj == null)
+                    {
+                        CloseImpl();
+                        return;
+                    }
+                    if (ReceiveMessage != null)
+                        ReceiveMessage(this, obj);
                 }
-                if (ReceiveMessage != null)
-                    ReceiveMessage(this, obj);
+                catch
+                {
+                    //we must igonre exception, otherwise, the namepipe wrapper will stop work.
+                }
             }
+            
         }
 
         /// <summary>
@@ -159,15 +172,25 @@ namespace NamedPipeWrapper
         /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="TWrite"/> is not marked as serializable.</exception>
         private void WritePipe()
         {
-            while (IsConnected && _streamWrapper.CanWrite)
-            {
-                _writeSignal.WaitOne();
-                while (_writeQueue.Count > 0)
+            
+                while (IsConnected && _streamWrapper.CanWrite)
                 {
-                    _streamWrapper.WriteObject(_writeQueue.Dequeue());
-                    _streamWrapper.WaitForPipeDrain();
+                    try
+                    {
+                        //using blockcollection, we needn't use singal to wait for result.
+                        //_writeSignal.WaitOne();
+                        //while (_writeQueue.Count > 0)
+                        {
+                            _streamWrapper.WriteObject(_writeQueue.Take());
+                            _streamWrapper.WaitForPipeDrain();
+                        }
+                    }
+                    catch
+                    {
+                    //we must igonre exception, otherwise, the namepipe wrapper will stop work.
                 }
             }
+          
         }
     }
 

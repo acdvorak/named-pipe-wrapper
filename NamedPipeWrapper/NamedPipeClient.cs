@@ -19,7 +19,8 @@ namespace NamedPipeWrapper
         /// Constructs a new <c>NamedPipeClient</c> to connect to the <see cref="NamedPipeNamedPipeServer{TReadWrite}"/> specified by <paramref name="pipeName"/>.
         /// </summary>
         /// <param name="pipeName">Name of the server's pipe</param>
-        public NamedPipeClient(string pipeName) : base(pipeName)
+        /// <param name="serverName">server name default is local.</param>
+        public NamedPipeClient(string pipeName,string serverName=".") : base(pipeName, serverName)
         {
         }
     }
@@ -62,14 +63,20 @@ namespace NamedPipeWrapper
         private readonly AutoResetEvent _disconnected = new AutoResetEvent(false);
 
         private volatile bool _closedExplicitly;
+        /// <summary>
+        /// the server name, which client will connect to.
+        /// </summary>
+        private string _serverName { get; set; }
 
         /// <summary>
         /// Constructs a new <c>NamedPipeClient</c> to connect to the <see cref="NamedPipeServer{TRead, TWrite}"/> specified by <paramref name="pipeName"/>.
         /// </summary>
         /// <param name="pipeName">Name of the server's pipe</param>
-        public NamedPipeClient(string pipeName)
+        /// <param name="serverName">the Name of the server, default is  local machine</param>
+        public NamedPipeClient(string pipeName,string serverName)
         {
             _pipeName = pipeName;
+            _serverName = serverName;
             AutoReconnect = true;
         }
 
@@ -144,12 +151,12 @@ namespace NamedPipeWrapper
         private void ListenSync()
         {
             // Get the name of the data pipe that should be used from now on by this NamedPipeClient
-            var handshake = PipeClientFactory.Connect<string, string>(_pipeName);
+            var handshake = PipeClientFactory.Connect<string, string>(_pipeName,_serverName);
             var dataPipeName = handshake.ReadObject();
             handshake.Close();
 
             // Connect to the actual data pipe
-            var dataPipe = PipeClientFactory.CreateAndConnectPipe(dataPipeName);
+            var dataPipe = PipeClientFactory.CreateAndConnectPipe(dataPipeName,_serverName);
 
             // Create a Connection object for the data pipe
             _connection = ConnectionFactory.CreateConnection<TRead, TWrite>(dataPipe);
@@ -202,23 +209,23 @@ namespace NamedPipeWrapper
 
     static class PipeClientFactory
     {
-        public static PipeStreamWrapper<TRead, TWrite> Connect<TRead, TWrite>(string pipeName)
+        public static PipeStreamWrapper<TRead, TWrite> Connect<TRead, TWrite>(string pipeName,string serverName)
             where TRead : class
             where TWrite : class
         {
-            return new PipeStreamWrapper<TRead, TWrite>(CreateAndConnectPipe(pipeName));
+            return new PipeStreamWrapper<TRead, TWrite>(CreateAndConnectPipe(pipeName,serverName));
         }
 
-        public static NamedPipeClientStream CreateAndConnectPipe(string pipeName)
+        public static NamedPipeClientStream CreateAndConnectPipe(string pipeName, string serverName)
         {
-            var pipe = CreatePipe(pipeName);
+            var pipe = CreatePipe(pipeName, serverName);
             pipe.Connect();
             return pipe;
         }
 
-        private static NamedPipeClientStream CreatePipe(string pipeName)
+        private static NamedPipeClientStream CreatePipe(string pipeName,string serverName)
         {
-            return new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.WriteThrough);
+            return new NamedPipeClientStream(serverName, pipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.WriteThrough);
         }
     }
 }
