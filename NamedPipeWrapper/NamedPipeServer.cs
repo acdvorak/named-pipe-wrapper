@@ -1,10 +1,8 @@
-﻿using System;
+﻿using NamedPipeWrapper.IO;
+using NamedPipeWrapper.Threading;
+using System;
 using System.Collections.Generic;
 using System.IO.Pipes;
-using System.Linq;
-using System.Text;
-using NamedPipeWrapper.IO;
-using NamedPipeWrapper.Threading;
 
 namespace NamedPipeWrapper
 {
@@ -110,6 +108,23 @@ namespace NamedPipeWrapper
         }
 
         /// <summary>
+        /// push message to the given client.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="clientName"></param>
+        public void PushMessage(TWrite message, string clientName)
+        {
+            lock (_connections)
+            {
+                foreach (var client in _connections)
+                {
+                    if (client.Name == clientName)
+                        client.PushMessage(message);
+                }
+            }
+        }
+
+        /// <summary>
         /// Closes all open client connections and stops listening for new ones.
         /// </summary>
         public void Stop()
@@ -126,7 +141,8 @@ namespace NamedPipeWrapper
 
             // If background thread is still listening for a client to connect,
             // initiate a dummy connection that will allow the thread to exit.
-            var dummyClient = new NamedPipeClient<TRead, TWrite>(_pipeName);
+            //dummy connection will use the local server name.
+            var dummyClient = new NamedPipeClient<TRead, TWrite>(_pipeName, ".");
             dummyClient.Start();
             dummyClient.WaitForConnection(TimeSpan.FromSeconds(2));
             dummyClient.Stop();
