@@ -64,6 +64,8 @@ namespace NamedPipeWrapper
         private readonly AutoResetEvent _connected = new AutoResetEvent(false);
         private readonly AutoResetEvent _disconnected = new AutoResetEvent(false);
 
+        private Worker worker;
+
         private volatile bool _closedExplicitly;
         /// <summary>
         /// the server name, which client will connect to.
@@ -89,9 +91,26 @@ namespace NamedPipeWrapper
         public void Start()
         {
             _closedExplicitly = false;
-            var worker = new Worker();
+            worker = new Worker();
             worker.Error += OnError;
             worker.DoWork(ListenSync);
+        }
+
+        /// <summary>
+        /// Connects to the named pipe server synchronously.
+        /// </summary>
+        /// <returns></returns>
+        public void StartSynchronously()
+        {
+            _closedExplicitly = false;
+            try
+            {
+                ListenSync();
+            }
+            catch (Exception e)
+            {
+                OnError(e);
+            }
         }
 
         /// <summary>
