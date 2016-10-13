@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO.Pipes;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using NamedPipeWrapper.IO;
 using NamedPipeWrapper.Threading;
@@ -45,6 +42,11 @@ namespace NamedPipeWrapper
         /// Invoked whenever a message is received from the server.
         /// </summary>
         public event ConnectionMessageEventHandler<TRead, TWrite> ServerMessage;
+
+        /// <summary>
+        /// Invoked when the client connects to the server.
+        /// </summary>
+        public event ConnectionEventHandler<TRead, TWrite> Connected;
 
         /// <summary>
         /// Invoked when the client disconnects from the server (e.g., the pipe is closed or broken).
@@ -96,10 +98,13 @@ namespace NamedPipeWrapper
         ///     Sends a message to the server over a named pipe.
         /// </summary>
         /// <param name="message">Message to send to the server.</param>
-        public void PushMessage(TWrite message)
+        /// <returns>false if conection is null</returns>
+        public bool PushMessage(TWrite message)
         {
-            if (_connection != null)
-                _connection.PushMessage(message);
+            if (_connection == null) return false;
+
+            _connection.PushMessage(message);
+            return true;
         }
 
         /// <summary>
@@ -193,6 +198,9 @@ namespace NamedPipeWrapper
             _connection.Open();
 
             _connected.Set();
+
+            if (Connected != null)
+                Connected(_connection);
         }
 
         private void OnDisconnected(NamedPipeConnection<TRead, TWrite> connection)
