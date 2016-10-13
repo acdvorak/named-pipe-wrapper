@@ -35,7 +35,6 @@ namespace UnitTests
         private int _expectedHash;
         private TestCollection _actualData;
         private int _actualHash;
-        private bool _clientDisconnected;
 
         private DateTime _startTime;
 
@@ -60,7 +59,6 @@ namespace UnitTests
             _expectedHash = 0;
             _actualData = null;
             _actualHash = 0;
-            _clientDisconnected = false;
 
             _server.ClientMessage += ServerOnClientMessage;
 

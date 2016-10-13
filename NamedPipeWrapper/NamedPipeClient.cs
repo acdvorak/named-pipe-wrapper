@@ -16,7 +16,7 @@ namespace NamedPipeWrapper
     public class NamedPipeClient<TReadWrite> : NamedPipeClient<TReadWrite, TReadWrite> where TReadWrite : class
     {
         /// <summary>
-        /// Constructs a new <c>NamedPipeClient</c> to connect to the <see cref="NamedPipeNamedPipeServer{TReadWrite}"/> specified by <paramref name="pipeName"/>.
+        /// Constructs a new <c>NamedPipeClient</c> to connect to the <see cref="NamedPipeServer{TReadWrite}"/> specified by <paramref name="pipeName"/>.
         /// </summary>
         /// <param name="pipeName">Name of the server's pipe</param>
         /// <param name="serverName">server name default is local.</param>
@@ -69,7 +69,7 @@ namespace NamedPipeWrapper
         private string _serverName { get; set; }
 
         /// <summary>
-        /// Constructs a new <c>NamedPipeClient</c> to connect to the <see cref="NamedPipeServer{TRead, TWrite}"/> specified by <paramref name="pipeName"/>.
+        /// Constructs a new <c>NamedPipeClient</c> to connect to the <see cref="NamedPipeServer{TReadWrite}"/> specified by <paramref name="pipeName"/>.
         /// </summary>
         /// <param name="pipeName">Name of the server's pipe</param>
         /// <param name="serverName">the Name of the server, default is  local machine</param>
@@ -113,35 +113,62 @@ namespace NamedPipeWrapper
         }
 
         #region Wait for connection/disconnection
-
-        public void WaitForConnection()
+        /// <summary>
+        /// Wait for connection
+        /// </summary>
+        /// <returns>true if connected</returns>
+        public bool WaitForConnection()
         {
-            _connected.WaitOne();
+            return _connected.WaitOne();
         }
 
-        public void WaitForConnection(int millisecondsTimeout)
+        /// <summary>
+        /// Wait for connection
+        /// </summary>
+        /// <param name="millisecondsTimeout"></param>
+        /// <returns>true if connected</returns>
+        public bool WaitForConnection(int millisecondsTimeout)
         {
-            _connected.WaitOne(millisecondsTimeout);
+            return _connected.WaitOne(millisecondsTimeout);
         }
 
-        public void WaitForConnection(TimeSpan timeout)
+        /// <summary>
+        /// Wait for connection
+        /// </summary>
+        /// <param name="timeout"></param>
+        /// <returns>true if connected</returns>
+        public bool WaitForConnection(TimeSpan timeout)
         {
-            _connected.WaitOne(timeout);
+            return _connected.WaitOne(timeout);
         }
 
-        public void WaitForDisconnection()
+        /// <summary>
+        /// Wait for disconnection
+        /// </summary>
+        /// <returns>true if disconnected</returns>
+        public bool WaitForDisconnection()
         {
-            _disconnected.WaitOne();
+            return _disconnected.WaitOne();
         }
 
-        public void WaitForDisconnection(int millisecondsTimeout)
+        /// <summary>
+        /// Wait for disconnection
+        /// </summary>
+        /// <param name="millisecondsTimeout"></param>
+        /// <returns>true if disconnected</returns>
+        public bool WaitForDisconnection(int millisecondsTimeout)
         {
-            _disconnected.WaitOne(millisecondsTimeout);
+            return _disconnected.WaitOne(millisecondsTimeout);
         }
 
-        public void WaitForDisconnection(TimeSpan timeout)
+        /// <summary>
+        /// Wait for disconnection
+        /// </summary>
+        /// <param name="timeout"></param>
+        /// <returns>true if disconnected</returns>
+        public bool WaitForDisconnection(TimeSpan timeout)
         {
-            _disconnected.WaitOne(timeout);
+            return _disconnected.WaitOne(timeout);
         }
 
         #endregion
