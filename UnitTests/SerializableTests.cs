@@ -54,7 +54,7 @@ namespace UnitTests
 
             _server = new NamedPipeServer<TestCollection>(PipeName);
             _client = new NamedPipeClient<TestCollection>(PipeName);
-             
+
             _expectedData = null;
             _expectedHash = 0;
             _actualData = null;
@@ -135,7 +135,7 @@ namespace UnitTests
             Assert.NotNull(_actualHash, string.Format("Server should have received client's {0} item message", _expectedData.Count));
             Assert.AreEqual(_expectedHash, _actualHash, string.Format("Hash codes for {0} item message should match", _expectedData.Count));
             Assert.AreEqual(_expectedData.Count, _actualData.Count, string.Format("Collection lengths should be equal"));
-            
+
             for (var i = 0; i < _actualData.Count; i++)
             {
                 var expectedItem = _expectedData[i];
@@ -216,14 +216,14 @@ namespace UnitTests
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((TestItem) obj);
+            return Equals((TestItem)obj);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                return (Id*397) ^ (int) Enum;
+                return (Id * 397) ^ (int)Enum;
             }
         }
     }
