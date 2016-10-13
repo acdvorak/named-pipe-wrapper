@@ -54,7 +54,7 @@ namespace UnitTests
 
             _server = new NamedPipeServer<TestCollection>(PipeName);
             _client = new NamedPipeClient<TestCollection>(PipeName);
-
+             
             _expectedData = null;
             _expectedHash = 0;
             _actualData = null;

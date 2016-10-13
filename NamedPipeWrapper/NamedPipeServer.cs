@@ -3,7 +3,7 @@ using NamedPipeWrapper.Threading;
 using System;
 using System.Collections.Generic;
 using System.IO.Pipes;
-
+ 
 namespace NamedPipeWrapper
 {
     /// <summary>

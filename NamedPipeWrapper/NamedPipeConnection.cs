@@ -7,7 +7,7 @@ using NamedPipeWrapper.Threading;
 using System.Collections.Concurrent;
 
 namespace NamedPipeWrapper
-{
+{ 
     /// <summary>
     /// Represents a connection between a named pipe client and server.
     /// </summary>
