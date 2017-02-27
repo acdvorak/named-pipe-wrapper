@@ -28,7 +28,7 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Gets the connection's name.
         /// </summary>
-        public string Name { get; }
+        public string Name { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether the pipe is connected or not.
