@@ -70,8 +70,16 @@ namespace ExampleGUI
         {
             if (string.IsNullOrWhiteSpace(textBoxMessage.Text))
                 return;
-
-            _server.PushMessage(textBoxMessage.Text);
+            if (listBoxClients.SelectedItem == null)
+            {
+                _server.PushMessage(textBoxMessage.Text);
+            }
+            else
+            {
+                var clientName = listBoxClients.SelectedItem.ToString();
+                _server.PushMessage(textBoxMessage.Text, clientName);
+            }
+            
             textBoxMessage.Text = "";
         }
     }
