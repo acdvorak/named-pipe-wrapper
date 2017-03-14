@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Pipes;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using NamedPipeWrapper.IO;
+using NamedPipeWrapper.Native;
 using NamedPipeWrapper.Threading;
 
 namespace NamedPipeWrapper
@@ -219,13 +221,40 @@ namespace NamedPipeWrapper
         public static NamedPipeClientStream CreateAndConnectPipe(string pipeName, string serverName)
         {
             var pipe = CreatePipe(pipeName, serverName);
-            pipe.Connect();
+            ConnectWithRetry(pipe, Path.GetFullPath($@"\\{serverName}\pipe\{pipeName}"));
             return pipe;
         }
 
         private static NamedPipeClientStream CreatePipe(string pipeName,string serverName)
         {
             return new NamedPipeClientStream(serverName, pipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.WriteThrough);
+        }
+
+        private static void ConnectWithRetry(NamedPipeClientStream pipe, string fullPath)
+        {
+            var connected = false;
+            var resetEvent = new ManualResetEvent(false);
+
+            while (!connected)
+            {
+                if (!Kernel32.WaitNamedPipe(fullPath, 0xffffffff))
+                {
+                    resetEvent.WaitOne(100); // prevent cpu spin
+                }
+                else
+                {
+                    try
+                    {
+                        // NamedPipeClientStream.Connect() defaults to a timeout value of -1, which blocks and spins the CPU, provide a sensible timeout value for Connect().
+                        pipe.Connect(15000);
+                        connected = true;
+                    }
+                    catch (TimeoutException)
+                    {
+                        connected = false;
+                    }
+                }
+            }
         }
     }
 }
