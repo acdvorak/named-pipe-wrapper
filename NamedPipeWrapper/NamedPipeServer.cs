@@ -1,10 +1,8 @@
-﻿using System;
+﻿using NamedPipeWrapper.IO;
+using NamedPipeWrapper.Threading;
+using System;
 using System.Collections.Generic;
 using System.IO.Pipes;
-using System.Linq;
-using System.Text;
-using NamedPipeWrapper.IO;
-using NamedPipeWrapper.Threading;
 
 namespace NamedPipeWrapper
 {
@@ -18,7 +16,17 @@ namespace NamedPipeWrapper
         /// Constructs a new <c>NamedPipeServer</c> object that listens for client connections on the given <paramref name="pipeName"/>.
         /// </summary>
         /// <param name="pipeName">Name of the pipe to listen on</param>
-        public NamedPipeServer(string pipeName) : base(pipeName)
+        public NamedPipeServer(string pipeName)
+            : base(pipeName, null)
+        {
+        }
+
+        /// <summary>
+        /// Constructs a new <c>NamedPipeServer</c> object that listens for client connections on the given <paramref name="pipeName"/>.
+        /// </summary>
+        /// <param name="pipeName">Name of the pipe to listen on</param>
+        public NamedPipeServer(string pipeName, PipeSecurity pipeSecurity)
+            : base(pipeName, pipeSecurity)
         {
         }
     }
@@ -53,6 +61,7 @@ namespace NamedPipeWrapper
         public event PipeExceptionEventHandler Error;
 
         private readonly string _pipeName;
+        private readonly PipeSecurity _pipeSecurity;
         private readonly List<NamedPipeConnection<TRead, TWrite>> _connections = new List<NamedPipeConnection<TRead, TWrite>>();
 
         private int _nextPipeId;
@@ -64,9 +73,10 @@ namespace NamedPipeWrapper
         /// Constructs a new <c>NamedPipeServer</c> object that listens for client connections on the given <paramref name="pipeName"/>.
         /// </summary>
         /// <param name="pipeName">Name of the pipe to listen on</param>
-        public Server(string pipeName)
+        public Server(string pipeName, PipeSecurity pipeSecurity)
         {
             _pipeName = pipeName;
+            _pipeSecurity = pipeSecurity;
         }
 
         /// <summary>
@@ -98,6 +108,23 @@ namespace NamedPipeWrapper
         }
 
         /// <summary>
+        /// push message to the given client.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="clientName"></param>
+        public void PushMessage(TWrite message, string clientName)
+        {
+            lock (_connections)
+            {
+                foreach (var client in _connections)
+                {
+                    if (client.Name == clientName)
+                        client.PushMessage(message);
+                }
+            }
+        }
+
+        /// <summary>
         /// Closes all open client connections and stops listening for new ones.
         /// </summary>
         public void Stop()
@@ -114,7 +141,8 @@ namespace NamedPipeWrapper
 
             // If background thread is still listening for a client to connect,
             // initiate a dummy connection that will allow the thread to exit.
-            var dummyClient = new NamedPipeClient<TRead, TWrite>(_pipeName);
+            //dummy connection will use the local server name.
+            var dummyClient = new NamedPipeClient<TRead, TWrite>(_pipeName, ".");
             dummyClient.Start();
             dummyClient.WaitForConnection(TimeSpan.FromSeconds(2));
             dummyClient.Stop();
@@ -128,12 +156,12 @@ namespace NamedPipeWrapper
             _isRunning = true;
             while (_shouldKeepRunning)
             {
-                WaitForConnection(_pipeName);
+                WaitForConnection(_pipeName, _pipeSecurity);
             }
             _isRunning = false;
         }
 
-        private void WaitForConnection(string pipeName)
+        private void WaitForConnection(string pipeName, PipeSecurity pipeSecurity)
         {
             NamedPipeServerStream handshakePipe = null;
             NamedPipeServerStream dataPipe = null;
@@ -144,14 +172,14 @@ namespace NamedPipeWrapper
             try
             {
                 // Send the client the name of the data pipe to use
-                handshakePipe = PipeServerFactory.CreateAndConnectPipe(pipeName);
+                handshakePipe = PipeServerFactory.CreateAndConnectPipe(pipeName, pipeSecurity);
                 var handshakeWrapper = new PipeStreamWrapper<string, string>(handshakePipe);
                 handshakeWrapper.WriteObject(connectionPipeName);
                 handshakeWrapper.WaitForPipeDrain();
                 handshakeWrapper.Close();
 
                 // Wait for the client to connect to the data pipe
-                dataPipe = PipeServerFactory.CreatePipe(connectionPipeName);
+                dataPipe = PipeServerFactory.CreatePipe(connectionPipeName, pipeSecurity);
                 dataPipe.WaitForConnection();
 
                 // Add the client's connection to the list of connections
@@ -243,16 +271,16 @@ namespace NamedPipeWrapper
 
     static class PipeServerFactory
     {
-        public static NamedPipeServerStream CreateAndConnectPipe(string pipeName)
+        public static NamedPipeServerStream CreateAndConnectPipe(string pipeName, PipeSecurity pipeSecurity)
         {
-            var pipe = CreatePipe(pipeName);
+            var pipe = CreatePipe(pipeName, pipeSecurity);
             pipe.WaitForConnection();
             return pipe;
         }
 
-        public static NamedPipeServerStream CreatePipe(string pipeName)
+        public static NamedPipeServerStream CreatePipe(string pipeName, PipeSecurity pipeSecurity)
         {
-            return new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough);
+            return new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough, 0, 0, pipeSecurity);
         }
     }
 }

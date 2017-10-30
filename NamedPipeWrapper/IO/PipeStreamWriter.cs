@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
 using System.Net;
@@ -61,8 +60,16 @@ namespace NamedPipeWrapper.IO
 	    /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
 		private byte[] Serialize(T obj)
         {
-			return _serializer.Serialize(obj);
-		}
+            try
+            {
+	            return _serializer.Serialize(obj);
+            }
+            catch
+            {
+                //if any exception in the serialize, it will stop named pipe wrapper, so there will ignore any exception.
+                return null;
+            }
+        }
 
 	    private void WriteLength(int len)
         {
