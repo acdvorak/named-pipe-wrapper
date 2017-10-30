@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
-using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
+using NamedPipeWrapper.IO.Serialization;
 
 namespace NamedPipeWrapper.IO
 {
@@ -16,53 +15,24 @@ namespace NamedPipeWrapper.IO
     /// <typeparam name="T">Reference type to serialize</typeparam>
     public class PipeStreamWriter<T> where T : class
     {
-        /// <summary>
-        /// Gets the underlying <c>PipeStream</c> object.
-        /// </summary>
-        public PipeStream BaseStream { get; private set; }
+	    private readonly ISerializer _serializer;
 
-        private readonly BinaryFormatter _binaryFormatter = new BinaryFormatter();
-
-        /// <summary>
-        /// Constructs a new <c>PipeStreamWriter</c> object that writes to given <paramref name="stream"/>.
-        /// </summary>
-        /// <param name="stream">Pipe to write to</param>
-        public PipeStreamWriter(PipeStream stream)
+	    /// <summary>
+		/// Constructs a new <c>PipeStreamWriter</c> object that writes to given <paramref name="stream"/>.
+		/// </summary>
+		/// <param name="stream">Pipe to write to</param>
+		public PipeStreamWriter(PipeStream stream)
         {
             BaseStream = stream;
-        }
+	        _serializer = ExtensibilityPoint.CreateSerializer();
+		}
 
-        #region Private stream writers
+	    /// <summary>
+        /// Gets the underlying <c>PipeStream</c> object.
+        /// </summary>
+        public PipeStream BaseStream { get; }
 
-        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
-        private byte[] Serialize(T obj)
-        {
-            using (var memoryStream = new MemoryStream())
-            {
-                _binaryFormatter.Serialize(memoryStream, obj);
-                return memoryStream.ToArray();
-            }
-        }
-
-        private void WriteLength(int len)
-        {
-            var lenbuf = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(len));
-            BaseStream.Write(lenbuf, 0, lenbuf.Length);
-        }
-
-        private void WriteObject(byte[] data)
-        {
-            BaseStream.Write(data, 0, data.Length);
-        }
-
-        private void Flush()
-        {
-            BaseStream.Flush();
-        }
-
-        #endregion
-
-        /// <summary>
+	    /// <summary>
         /// Writes an object to the pipe.  This method blocks until all data is sent.
         /// </summary>
         /// <param name="obj">Object to write to the pipe</param>
@@ -75,7 +45,7 @@ namespace NamedPipeWrapper.IO
             Flush();
         }
 
-        /// <summary>
+	    /// <summary>
         ///     Waits for the other end of the pipe to read all sent bytes.
         /// </summary>
         /// <exception cref="ObjectDisposedException">The pipe is closed.</exception>
@@ -85,5 +55,31 @@ namespace NamedPipeWrapper.IO
         {
             BaseStream.WaitForPipeDrain();
         }
+
+	    #region Private stream writers
+
+	    /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
+		private byte[] Serialize(T obj)
+        {
+			return _serializer.Serialize(obj);
+		}
+
+	    private void WriteLength(int len)
+        {
+            var lenbuf = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(len));
+            BaseStream.Write(lenbuf, 0, lenbuf.Length);
+        }
+
+	    private void WriteObject(byte[] data)
+        {
+            BaseStream.Write(data, 0, data.Length);
+        }
+
+	    private void Flush()
+        {
+            BaseStream.Flush();
+        }
+
+	    #endregion
     }
 }
