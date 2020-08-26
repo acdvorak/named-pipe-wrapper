@@ -3,6 +3,7 @@ using NamedPipeWrapper.Threading;
 using System;
 using System.Collections.Generic;
 using System.IO.Pipes;
+using System.Threading;
 
 namespace NamedPipeWrapper
 {
@@ -86,10 +87,19 @@ namespace NamedPipeWrapper
         /// </summary>
         public void Start()
         {
+            Start(CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Begins listening for client connections in a separate background thread.
+        /// This method returns immediately.
+        /// </summary>
+        public void Start(CancellationToken stoppingToken)
+        {
             _shouldKeepRunning = true;
             var worker = new Worker();
             worker.Error += OnError;
-            worker.DoWork(ListenSync);
+            worker.DoWork(() => ListenSync(stoppingToken), stoppingToken);
         }
 
         /// <summary>
@@ -140,6 +150,7 @@ namespace NamedPipeWrapper
                 }
             }
 
+
             // If background thread is still listening for a client to connect,
             // initiate a dummy connection that will allow the thread to exit.
             //dummy connection will use the local server name.
@@ -152,10 +163,10 @@ namespace NamedPipeWrapper
 
         #region Private methods
 
-        private void ListenSync()
+        private void ListenSync(CancellationToken stoppingToken)
         {
             _isRunning = true;
-            while (_shouldKeepRunning)
+            while (_shouldKeepRunning || !stoppingToken.IsCancellationRequested)
             {
                 WaitForConnection(_pipeName, _pipeSecurity);
             }
