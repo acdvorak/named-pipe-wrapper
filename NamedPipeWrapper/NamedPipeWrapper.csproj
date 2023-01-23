@@ -16,7 +16,7 @@
 
   <PropertyGroup>
     <PackageId>NamedPipeWrapper.Json</PackageId>
-    <Version>1.4.0</Version>
+    <Version>1.5.0</Version>
     <ProjectGuid>{73152691-3CDE-46DF-8D04-7117747DFFE7}</ProjectGuid>
   </PropertyGroup>
 
@@ -70,7 +70,6 @@
     <Reference Include="System.Web.Extensions" />
   </ItemGroup>
 
-  <!--
   <ItemGroup>
     <None Include="..\README.md">
       <Pack>True</Pack>
@@ -80,13 +79,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\LICENSE">
+    <None Include="..\LICENSE.txt">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
       <Visible>false</Visible>
     </None>
   </ItemGroup>
 
+  <!--
   <ItemGroup>
     <None Include="Resources\icon.png">
       <Pack>True</Pack>
