@@ -1,3 +1,4 @@
+using NamedPipeWrapper.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -41,7 +42,10 @@ namespace NamedPipeWrapper.IO
             {
                 using (var memoryStream = new MemoryStream())
                 {
-                    _binaryFormatter.Serialize(memoryStream, obj);
+                    if (JsonExtension.IsTypeJson(typeof(T)))
+                        _binaryFormatter.Serialize(memoryStream, obj.JsonSerialize());
+                    else
+                        _binaryFormatter.Serialize(memoryStream, obj);
                     return memoryStream.ToArray();
                 }
             }

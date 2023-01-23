@@ -7,6 +7,32 @@ using System.IO.Pipes;
 namespace NamedPipeWrapper
 {
     /// <summary>
+    /// NamedPipeServer
+    /// </summary>
+    /// <typeparam name="TRead"></typeparam>
+    /// <typeparam name="TWrite"></typeparam>
+    public class NamedPipeServer<TRead, TWrite> : Server<TRead, TWrite>
+        where TRead : class
+        where TWrite : class
+    {
+        /// <summary>
+        /// NamedPipeServer
+        /// </summary>
+        /// <param name="pipeName"></param>
+        public NamedPipeServer(string pipeName) : base(pipeName, null)
+        {
+        }
+        /// <summary>
+        /// NamedPipeServer
+        /// </summary>
+        /// <param name="pipeName"></param>
+        /// <param name="pipeSecurity"></param>
+        public NamedPipeServer(string pipeName, PipeSecurity pipeSecurity) : base(pipeName, pipeSecurity)
+        {
+        }
+    }
+
+    /// <summary>
     /// Wraps a <see cref="NamedPipeServerStream"/> and provides multiple simultaneous client connection handling.
     /// </summary>
     /// <typeparam name="TReadWrite">Reference type to read from and write to the named pipe</typeparam>

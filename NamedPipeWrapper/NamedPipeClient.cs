@@ -73,7 +73,7 @@ namespace NamedPipeWrapper
         /// </summary>
         /// <param name="pipeName">Name of the server's pipe</param>
         /// <param name="serverName">the Name of the server, default is  local machine</param>
-        public NamedPipeClient(string pipeName,string serverName)
+        public NamedPipeClient(string pipeName,string serverName=".")
         {
             _pipeName = pipeName;
             _serverName = serverName;

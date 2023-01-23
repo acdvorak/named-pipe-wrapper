@@ -1,4 +1,11 @@
-# Named Pipe Wrapper for .NET 4.0
+# Named Pipe Wrapper Json for .NET 4.0
+
+[![Visual Studio 2022](https://img.shields.io/badge/Visual%20Studio-2022-blue)](../..)
+[![Nuke](https://img.shields.io/badge/Nuke-Build-blue)](https://nuke.build/)
+[![License MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Build](../../actions/workflows/Build.yml/badge.svg)](../../actions)
+
+***This project is based of Andrew C. Dvorak's work at [Named Pipe Wrapper](https://github.com/acdvorak/named-pipe-wrapper)***
 
 A simple, easy to use, strongly-typed wrapper around .NET named pipes.
 
