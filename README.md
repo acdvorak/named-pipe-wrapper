@@ -22,8 +22,8 @@ Available as a [NuGet package](https://www.nuget.org/packages/NamedPipeWrapper/)
 
 # Requirements
 
-Requires .NET 4.0 full.
-Requires [Newtonsoft.Json](https://www.nuget.org/packages/Newtonsoft.Json) >= 9.0.1
+* Requires .NET 4.0 full.
+* Requires [Newtonsoft.Json](https://www.nuget.org/packages/Newtonsoft.Json) >= 9.0.1
 
 # Usage
 
