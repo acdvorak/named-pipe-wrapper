@@ -63,7 +63,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="9.*" IncludeAssets="build; compile" PrivateAssets="All" />
+    <PackageReference Include="Newtonsoft.Json" Version="9.*" />
   </ItemGroup>
 
   <ItemGroup Condition="$(Configuration.Contains('Debug'))">
