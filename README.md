@@ -20,6 +20,10 @@ Available as a [NuGet package](https://www.nuget.org/packages/NamedPipeWrapper/)
 *  Messages are sent and received asynchronously on a separate background thread and marshalled back to the calling thread (typically the UI).
 *  Supports large messages - up to 300 MiB.
 
+## Json
+
+By default, all classes gonna be serialized/deserialized by `JsonUtils` that use `Newtonsoft.Json`, in the end, a JSON string is passed using the `PipeStream`.
+
 # Requirements
 
 * Requires .NET 4.0 full.
