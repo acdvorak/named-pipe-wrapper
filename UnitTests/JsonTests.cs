@@ -205,7 +205,7 @@ namespace UnitTests
             if (_exceptions.Any())
                 throw new AggregateException(_exceptions);
 
-            Console.WriteLine($"{_expectedData} = {_actualData}");
+            //Console.WriteLine($"{_expectedData} = {_actualData}");
 
             Assert.AreEqual(_expectedData, _actualData, string.Format("Data should be equal"));
 
