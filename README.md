@@ -19,6 +19,19 @@ Requires .NET 4.0 full.
 
 # Usage
 
+Message:
+
+_(Class must have a [`[Serializable]` attribute](https://learn.microsoft.com/en-us/dotnet/api/system.serializableattribute?redirectedfrom=MSDN&view=net-7.0))_
+
+```csharp
+[Serializable]
+class SomeClass
+{
+    public int Id;
+    public string Text;
+}
+```
+
 Server:
 
 ```csharp
