@@ -40,6 +40,9 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IO\Serialization\BinaryFormatterSerializer.cs" />
+    <Compile Include="IO\Serialization\ExtensibilityPoint.cs" />
+    <Compile Include="IO\Serialization\ISerializer.cs" />
     <Compile Include="NamedPipeClient.cs" />
     <Compile Include="NamedPipeConnection.cs" />
     <Compile Include="IO\PipeStreamReader.cs" />
