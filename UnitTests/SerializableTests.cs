@@ -1,13 +1,13 @@
-﻿using System;
+﻿using log4net.Appender;
+using log4net.Config;
+using log4net.Layout;
+using NamedPipeWrapper;
+using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using NUnit.Framework;
-using NamedPipeWrapper;
-using log4net.Appender;
-using log4net.Config;
-using log4net.Layout;
 
 namespace UnitTests
 {
