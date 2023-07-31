@@ -1,3 +1,4 @@
+using ProtoBuf;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -41,11 +42,12 @@ namespace NamedPipeWrapper.IO
             {
                 using (var memoryStream = new MemoryStream())
                 {
-                    _binaryFormatter.Serialize(memoryStream, obj);
+                    Serializer.Serialize(memoryStream, obj);
+                    //_binaryFormatter.Serialize(memoryStream, obj);
                     return memoryStream.ToArray();
                 }
             }
-            catch
+            catch (Exception ex)
             {
                 //if any exception in the serialize, it will stop named pipe wrapper, so there will ignore any exception.
                 return null;

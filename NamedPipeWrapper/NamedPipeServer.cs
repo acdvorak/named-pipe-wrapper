@@ -3,6 +3,7 @@ using NamedPipeWrapper.Threading;
 using System;
 using System.Collections.Generic;
 using System.IO.Pipes;
+using System.Threading;
 
 namespace NamedPipeWrapper
 {
@@ -28,6 +29,7 @@ namespace NamedPipeWrapper
         public NamedPipeServer(string pipeName, PipeSecurity pipeSecurity)
             : base(pipeName, pipeSecurity)
         {
+
         }
     }
 
@@ -85,10 +87,19 @@ namespace NamedPipeWrapper
         /// </summary>
         public void Start()
         {
+            Start(CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Begins listening for client connections in a separate background thread.
+        /// This method returns immediately.
+        /// </summary>
+        public void Start(CancellationToken stoppingToken)
+        {
             _shouldKeepRunning = true;
             var worker = new Worker();
             worker.Error += OnError;
-            worker.DoWork(ListenSync);
+            worker.DoWork(() => ListenSync(stoppingToken), stoppingToken);
         }
 
         /// <summary>
@@ -139,6 +150,7 @@ namespace NamedPipeWrapper
                 }
             }
 
+
             // If background thread is still listening for a client to connect,
             // initiate a dummy connection that will allow the thread to exit.
             //dummy connection will use the local server name.
@@ -151,11 +163,14 @@ namespace NamedPipeWrapper
 
         #region Private methods
 
-        private void ListenSync()
+        private void ListenSync(CancellationToken stoppingToken)
         {
             _isRunning = true;
             while (_shouldKeepRunning)
             {
+                if (stoppingToken.IsCancellationRequested)
+                    Stop();
+
                 WaitForConnection(_pipeName, _pipeSecurity);
             }
             _isRunning = false;
@@ -278,9 +293,16 @@ namespace NamedPipeWrapper
             return pipe;
         }
 
+
         public static NamedPipeServerStream CreatePipe(string pipeName, PipeSecurity pipeSecurity)
         {
-            return new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough, 0, 0, pipeSecurity);
+            //return new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough, 0, 0, pipeSecurity);
+            
+            // NOTE: we use the old framework version package to call into the NamedPipeServerStream constructor that allows
+            // PipeSecurity to be passed in.  It is a known issue that .net core does not support the pipesecurity param
+            // as it's based upon native windows functionality and is not supported cross platform.   Using the package
+            // is a successful workaround to set the pipe's security.
+            return NamedPipeServerStreamConstructors.New(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough, 0, 0, pipeSecurity);
         }
     }
 }

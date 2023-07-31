@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
@@ -68,7 +69,8 @@ namespace NamedPipeWrapper.IO
             BaseStream.Read(data, 0, len);
             using (var memoryStream = new MemoryStream(data))
             {
-                return (T) _binaryFormatter.Deserialize(memoryStream);
+                return Serializer.Deserialize<T>(memoryStream);
+                //return (T) _binaryFormatter.Deserialize(memoryStream);
             }
         }
 

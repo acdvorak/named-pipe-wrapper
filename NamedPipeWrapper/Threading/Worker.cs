@@ -33,22 +33,25 @@ namespace NamedPipeWrapper.Threading
             _callbackThread = callbackThread;
         }
 
-        public void DoWork(Action action)
+        public void DoWork(Action action, CancellationToken stoppingToken)
         {
-            new Task(DoWorkImpl, action, CancellationToken.None, TaskCreationOptions.LongRunning).Start();
+            new Task(DoWorkImpl, Tuple.Create(action, stoppingToken), stoppingToken, TaskCreationOptions.LongRunning).Start();
         }
 
         private void DoWorkImpl(object oAction)
         {
-            var action = (Action) oAction;
+            var tuple = (Tuple<Action, CancellationToken>) oAction;
+            var action = tuple.Item1;
+            var stoppingToken = tuple.Item2;
+
             try
             {
                 action();
-                Callback(Succeed);
+                Callback(Succeed, stoppingToken);
             }
             catch (Exception e)
             {
-                Callback(() => Fail(e));
+                Callback(() => Fail(e), stoppingToken);
             }
         }
 
@@ -64,9 +67,9 @@ namespace NamedPipeWrapper.Threading
                 Error(exception);
         }
 
-        private void Callback(Action action)
+        private void Callback(Action action, CancellationToken stoppingToken)
         {
-            Task.Factory.StartNew(action, CancellationToken.None, TaskCreationOptions.None, _callbackThread);
+            Task.Factory.StartNew(action, stoppingToken, TaskCreationOptions.None, _callbackThread);
         }
     }
 

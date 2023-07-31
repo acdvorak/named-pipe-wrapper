@@ -76,12 +76,12 @@ namespace NamedPipeWrapper
             var readWorker = new Worker();
             readWorker.Succeeded += OnSucceeded;
             readWorker.Error += OnError;
-            readWorker.DoWork(ReadPipe);
+            readWorker.DoWork(ReadPipe, CancellationToken.None);
 
             var writeWorker = new Worker();
             writeWorker.Succeeded += OnSucceeded;
             writeWorker.Error += OnError;
-            writeWorker.DoWork(WritePipe);
+            writeWorker.DoWork(WritePipe, CancellationToken.None);
         }
 
         /// <summary>

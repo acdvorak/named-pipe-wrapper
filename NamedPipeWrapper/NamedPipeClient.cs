@@ -80,6 +80,8 @@ namespace NamedPipeWrapper
             AutoReconnect = true;
         }
 
+
+
         /// <summary>
         /// Connects to the named pipe server asynchronously.
         /// This method returns immediately, possibly before the connection has been established.
@@ -89,8 +91,9 @@ namespace NamedPipeWrapper
             _closedExplicitly = false;
             var worker = new Worker();
             worker.Error += OnError;
-            worker.DoWork(ListenSync);
+            worker.DoWork(ListenSync, CancellationToken.None);
         }
+
 
         /// <summary>
         ///     Sends a message to the server over a named pipe.
@@ -225,7 +228,7 @@ namespace NamedPipeWrapper
 
         private static NamedPipeClientStream CreatePipe(string pipeName,string serverName)
         {
-            return new NamedPipeClientStream(serverName, pipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.WriteThrough);
+            return new NamedPipeClientStream(serverName, pipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.WriteThrough, System.Security.Principal.TokenImpersonationLevel.None);
         }
     }
 }
