@@ -166,8 +166,11 @@ namespace NamedPipeWrapper
         private void ListenSync(CancellationToken stoppingToken)
         {
             _isRunning = true;
-            while (_shouldKeepRunning || !stoppingToken.IsCancellationRequested)
+            while (_shouldKeepRunning)
             {
+                if (stoppingToken.IsCancellationRequested)
+                    Stop();
+
                 WaitForConnection(_pipeName, _pipeSecurity);
             }
             _isRunning = false;
@@ -293,11 +296,13 @@ namespace NamedPipeWrapper
 
         public static NamedPipeServerStream CreatePipe(string pipeName, PipeSecurity pipeSecurity)
         {
-#if NETCOREAPP3_1
+            //return new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough, 0, 0, pipeSecurity);
+            
+            // NOTE: we use the old framework version package to call into the NamedPipeServerStream constructor that allows
+            // PipeSecurity to be passed in.  It is a known issue that .net core does not support the pipesecurity param
+            // as it's based upon native windows functionality and is not supported cross platform.   Using the package
+            // is a successful workaround to set the pipe's security.
             return NamedPipeServerStreamConstructors.New(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough, 0, 0, pipeSecurity);
-#else
-            return new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough, 0, 0, pipeSecurity);
-#endif
         }
     }
 }

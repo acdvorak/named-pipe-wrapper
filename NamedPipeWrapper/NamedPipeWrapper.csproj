@@ -1,26 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;net472</TargetFrameworks>
+    <TargetFramework>net5.0-windows10.0.19041.0</TargetFramework>
     <OutputType>Library</OutputType>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
     <SccAuxPath>SAK</SccAuxPath>
     <SccProvider>SAK</SccProvider>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DocumentationFile>bin\Debug\NamedPipeWrapper.XML</DocumentationFile>
   </PropertyGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
-    <Reference Include="System.IO.Pipes.AccessControl" />
+  <ItemGroup>
+    <PackageReference Include="NamedPipeServerStream.NetFrameworkVersion" Version="1.0.8" />
+    <PackageReference Include="protobuf-net" Version="3.0.101" />
+    <PackageReference Include="System.IO.Pipes.AccessControl" Version="5.0.0" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
-    <PackageReference Include="NamedPipeServerStream.NetFrameworkVersion">
-      <Version>1.0.2</Version>
-    </PackageReference>
-    <PackageReference Include="System.IO.Pipes.AccessControl">
-      <Version>4.5.1</Version>
-    </PackageReference>
-  </ItemGroup>
-
+  <Import Project="$(SolutionDir)\BuildCommon.targets" />
 </Project>

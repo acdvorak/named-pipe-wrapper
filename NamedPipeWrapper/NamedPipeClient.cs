@@ -228,7 +228,7 @@ namespace NamedPipeWrapper
 
         private static NamedPipeClientStream CreatePipe(string pipeName,string serverName)
         {
-            return new NamedPipeClientStream(serverName, pipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.WriteThrough);
+            return new NamedPipeClientStream(serverName, pipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.WriteThrough, System.Security.Principal.TokenImpersonationLevel.None);
         }
     }
 }
